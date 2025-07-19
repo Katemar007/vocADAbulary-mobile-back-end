@@ -1,4 +1,4 @@
-package com.vocadabulary.backendapi;
+package com.vocadabulary;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
