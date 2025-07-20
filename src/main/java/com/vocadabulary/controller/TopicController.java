@@ -36,4 +36,10 @@ public class TopicController {
         List<Flashcard> flashcards = flashcardRepository.findByTopicId(id);
         return ResponseEntity.ok(flashcards);
     }
+
+    @PostMapping
+    public ResponseEntity<Topic> createTopic(@RequestBody Topic newTopic) {
+        Topic savedTopic = topicRepository.save(newTopic);
+        return ResponseEntity.ok(savedTopic);
+    }
 }
