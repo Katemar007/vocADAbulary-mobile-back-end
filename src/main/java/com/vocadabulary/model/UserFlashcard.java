@@ -21,8 +21,9 @@ public class UserFlashcard {
     @JoinColumn(name = "flashcard_id")
     private Flashcard flashcard;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private FlashcardStatus status;
 
     @Column(name = "last_reviewed")
     private LocalDateTime lastReviewed;
@@ -32,7 +33,7 @@ public class UserFlashcard {
 
     public UserFlashcard() {}
 
-    public UserFlashcard(User user, Flashcard flashcard, String status, LocalDateTime lastReviewed) {
+    public UserFlashcard(User user, Flashcard flashcard, FlashcardStatus status, LocalDateTime lastReviewed) {
         this.user = user;
         this.flashcard = flashcard;
         this.status = status;
@@ -64,11 +65,11 @@ public class UserFlashcard {
         this.flashcard = flashcard;
     }
 
-    public String getStatus() {
+    public FlashcardStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(FlashcardStatus status) {
         this.status = status;
     }
 
