@@ -79,4 +79,12 @@ public class Flashcard {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
+    }   
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
