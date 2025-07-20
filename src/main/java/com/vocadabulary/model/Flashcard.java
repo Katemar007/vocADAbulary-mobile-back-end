@@ -3,6 +3,8 @@ package com.vocadabulary.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 public class Flashcard {
 
@@ -12,6 +14,7 @@ public class Flashcard {
 
     @ManyToOne
     @JoinColumn(name = "topic_id")
+    @JsonBackReference
     private Topic topic;
 
     private String word;
@@ -28,7 +31,6 @@ public class Flashcard {
 
     public Flashcard() {}
 
-    // Constructor with fields
     public Flashcard(Topic topic, String word, String definition, String example,
                      String synonyms, String phonetic, String audioUrl, LocalDateTime createdAt) {
         this.topic = topic;
@@ -41,6 +43,40 @@ public class Flashcard {
         this.createdAt = createdAt;
     }
 
-    // Getters and setters for all fields go here...
-}
+    // add public getters
+    public Long getId() {
+        return id;
+    }
 
+    public Topic getTopic() {
+        return topic;
+    }
+
+    public String getWord() {
+        return word;
+    }
+
+    public String getDefinition() {
+        return definition;
+    }
+
+    public String getExample() {
+        return example;
+    }
+
+    public String getSynonyms() {
+        return synonyms;
+    }
+
+    public String getPhonetic() {
+        return phonetic;
+    }
+
+    public String getAudioUrl() {
+        return audioUrl;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+}

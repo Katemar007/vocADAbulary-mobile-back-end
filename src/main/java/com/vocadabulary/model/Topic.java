@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 public class Topic {
     @Id
@@ -14,7 +16,8 @@ public class Topic {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "topic")
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Flashcard> flashcards;
 
     // Getters and setters
