@@ -1,7 +1,13 @@
     {
         "version": "0.2.0",
         "configurations": [
-
+            {
+                "type": "java",
+                "name": "VocadabularyApplication",
+                "request": "launch",
+                "mainClass": "com.vocadabulary.VocadabularyApplication",
+                "projectName": "backendapi"
+            },
             {
                 "type": "java",
                 "name": "Launch Spring Boot App",
@@ -11,10 +17,7 @@
                 "env": {
                     "SPRING_DATASOURCE_URL": "jdbc:postgresql://localhost:5432/vocadabulary_db",
                     "SPRING_DATASOURCE_USERNAME": "postgres",
-                    "SPRING_DATASOURCE_PASSWORD": "",
-                    // "SPRING_FLYWAY_URL": "jdbc:postgresql://dpg-d1sapvripnbc73dso0eg-a.oregon-postgres.render.com",
-                    // "SPRING_FLYWAY_USER": "voc_ada_bulary_db_user",
-                    // "SPRING_FLYWAY_PASSWORD": "tPnEQxM687sQj6MwAxmzl38rZMQohl0g"
+                    "SPRING_DATASOURCE_PASSWORD": ""
                 }
             }
         ]

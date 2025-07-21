@@ -1,7 +1,9 @@
 package com.vocadabulary.controllers;
-
 import com.vocadabulary.models.User;
 import com.vocadabulary.services.UserService;
+
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostConstruct
+    public void checkDbConnection() {
+        System.out.println(">>> DB URL: " + System.getProperty("spring.datasource.url"));
+    }
+    
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
