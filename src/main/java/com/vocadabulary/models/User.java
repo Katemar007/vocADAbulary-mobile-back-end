@@ -19,19 +19,19 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // 🔁 One User → Many UserFlashcards
+    //  One User → Many UserFlashcards
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserFlashcard> userFlashcards;
 
-    // 🔁 One User → Many QuizResults
+    // One User → Many QuizResults
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuizResult> quizResults;
 
-    // 🔁 One User → One ProgressSummary
+    //  One User → One ProgressSummary
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProgressSummary userProgressSummary;
 
-    // 🔁 One User → Many UserQuizProgress
+    //  One User → Many UserQuizProgress
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserQuizProgress> userQuizProgress;
 

@@ -12,6 +12,11 @@ public class UserProgressSummary {
     @Column(name = "user_id")
     private Long userId;
 
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(name = "total_flashcards")
     private int totalFlashcards;
 
@@ -39,7 +44,7 @@ public class UserProgressSummary {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Getters and setters
+    // === Getters & Setters ===
 
     public Long getUserId() {
         return userId;
@@ -47,6 +52,14 @@ public class UserProgressSummary {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public int getTotalFlashcards() {
@@ -121,11 +134,13 @@ public class UserProgressSummary {
         this.updatedAt = updatedAt;
     }
 
+    // === Constructors ===
+
     public UserProgressSummary() {}
 
     public UserProgressSummary(Long userId, int totalFlashcards, int learnedFlashcards, int failedFlashcards,
-                            int quizzesAttempted, int quizzesPassed, float quizSuccessRate,
-                            int sentencesBuilt, LocalDate lastActive, LocalDateTime updatedAt) {
+                               int quizzesAttempted, int quizzesPassed, float quizSuccessRate,
+                               int sentencesBuilt, LocalDate lastActive, LocalDateTime updatedAt) {
         this.userId = userId;
         this.totalFlashcards = totalFlashcards;
         this.learnedFlashcards = learnedFlashcards;
