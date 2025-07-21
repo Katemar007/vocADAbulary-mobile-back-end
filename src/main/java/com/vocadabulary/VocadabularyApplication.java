@@ -1,11 +1,11 @@
-package com.vocadabulary.backendapi;
+package com.vocadabulary;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BackendApiApplication {
+public class VocadabularyApplication {
     public static void main(String[] args) {
-        SpringApplication.run(BackendApiApplication.class, args);
+        SpringApplication.run(VocadabularyApplication.class, args);
     }
 }
