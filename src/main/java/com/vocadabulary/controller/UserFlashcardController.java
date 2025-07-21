@@ -18,4 +18,14 @@ public class UserFlashcardController {
     public List<UserFlashcard> getFavoriteFlashcards(@PathVariable Long userId) {
         return userFlashcardRepository.findByUserIdAndStatus(userId, FlashcardStatus.FAVORITE);
     }
+
+    @GetMapping("/learned")
+    public List<UserFlashcard> getLearnedFlashcards(@PathVariable Long userId) {
+        return userFlashcardRepository.findByUserIdAndStatus(userId, FlashcardStatus.LEARNED);
+    }
+
+    @GetMapping("/in-progress")
+    public List<UserFlashcard> getInProgressFlashcards(@PathVariable Long userId) {
+        return userFlashcardRepository.findByUserIdAndStatus(userId, FlashcardStatus.IN_PROGRESS);
+    }
 }
