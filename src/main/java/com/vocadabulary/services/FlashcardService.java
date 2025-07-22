@@ -23,6 +23,10 @@ public class FlashcardService {
         return flashcardRepo.findById(id);
     }
 
+    public List<Flashcard> getFlashcardsByTopicId(Long topicId) {
+        return flashcardRepo.findByTopicId(topicId);
+    }
+
     public Flashcard createFlashcard(Flashcard flashcard) {
         return flashcardRepo.save(flashcard);
     }

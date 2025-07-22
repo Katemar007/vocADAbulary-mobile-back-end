@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/flashcards")
+@RequestMapping("/flashcards")
 public class FlashcardController {
 
     private final FlashcardService flashcardService;
