@@ -1,7 +1,7 @@
 package com.vocadabulary.controllers;
 
 import com.vocadabulary.models.Topic;
-import com.vocadabulary.repositories.TopicRepository;
+import com.vocadabulary.services.TopicService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,16 +10,19 @@ import java.util.List;
 @RequestMapping("/topics")
 public class TopicController {
 
-    private final TopicRepository topicRepository;
+    private final TopicService topicService;
 
-    // Constructor injection for the repository
-    public TopicController(TopicRepository topicRepository) {
-        this.topicRepository = topicRepository;
+    public TopicController(TopicService topicService) {
+        this.topicService = topicService;
     }
 
-    // GET /api/topics - Returns a list of all topics
     @GetMapping
     public List<Topic> getAllTopics() {
-        return topicRepository.findAll();
+        return topicService.getAllTopics();
+    }
+
+    @GetMapping("/{id}")
+    public Topic getTopicById(@PathVariable Long id) {
+        return topicService.getTopicById(id);
     }
 }
