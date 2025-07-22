@@ -17,4 +17,8 @@ public class UserFlashcardService {
     public List<UserFlashcard> getAllByUserId(Long userId) {
         return userFlashcardRepo.findByUserId(userId);
     }
+
+    public List<UserFlashcard> getFlashcardsByUserIdAndStatus(Long userId, String status) {
+        return userFlashcardRepo.findByUserIdAndStatus(userId, status);
+    }
 }

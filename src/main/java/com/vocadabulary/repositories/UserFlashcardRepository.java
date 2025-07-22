@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, UserFlashcardId> {
     List<UserFlashcard> findByUserId(Long userId);
+    List<UserFlashcard> findByUserIdAndStatus(Long userId, String status);
 }
