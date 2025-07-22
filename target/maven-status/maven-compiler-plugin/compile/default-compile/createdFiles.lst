@@ -14,5 +14,6 @@ com/vocadabulary/models/UserFlashcard.class
 com/vocadabulary/services/FlashcardService.class
 com/vocadabulary/models/QuizQuestion.class
 com/vocadabulary/controllers/UserController.class
+UserFlashcardRepository.class
 com/vocadabulary/models/UserFlashcardId.class
 com/vocadabulary/models/QuizResult.class

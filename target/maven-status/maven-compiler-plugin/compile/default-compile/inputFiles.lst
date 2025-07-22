@@ -4,7 +4,9 @@
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/controllers/UserController.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/Topic.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/VocadabularyApplication.java
+/Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/repositories/UserFlashcardRepository.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/Flashcard.java
+/Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/controllers/UserFlashcardController.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/services/UserService.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/repositories/UserRepository.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/User.java
@@ -17,5 +19,6 @@
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/services/TopicService.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/Quiz.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/QuizResult.java
+/Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/services/UserFlashcardService.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/QuizQuestion.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/UserFlashcard.java

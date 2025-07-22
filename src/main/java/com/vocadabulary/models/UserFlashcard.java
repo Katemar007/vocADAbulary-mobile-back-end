@@ -1,12 +1,7 @@
 package com.vocadabulary.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -17,13 +12,15 @@ public class UserFlashcard {
     @EmbeddedId
     private UserFlashcardId id;
 
+    @JsonIgnore
     @ManyToOne
-    @MapsId("userId")  // Maps userId attribute of embedded id
+    @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnore
     @ManyToOne
-    @MapsId("flashcardId")  // Maps flashcardId attribute of embedded id
+    @MapsId("flashcardId")
     @JoinColumn(name = "flashcard_id")
     private Flashcard flashcard;
 
