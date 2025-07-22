@@ -11,7 +11,9 @@
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/UserQuizProgress.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/controllers/FlashcardController.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/services/FlashcardService.java
+/Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/repositories/TopicRepository.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/repositories/FlashcardRepository.java
+/Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/controllers/TopicController.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/Quiz.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/QuizResult.java
 /Users/aleksandravershkova/Developer/projects/vocADAbulary/capstone-back-end/src/main/java/com/vocadabulary/models/QuizQuestion.java

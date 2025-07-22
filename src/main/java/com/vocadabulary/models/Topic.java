@@ -1,8 +1,13 @@
 package com.vocadabulary.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "topics")
@@ -19,11 +24,13 @@ public class Topic {
     private LocalDateTime createdAt;
 
     // One topic has many flashcards
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Flashcard> flashcards;
 
     // One topic has many quizzes
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Quiz> quizzes;
 
     // Constructors

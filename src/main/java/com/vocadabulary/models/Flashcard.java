@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "flashcards")
 public class Flashcard {
@@ -21,7 +23,8 @@ public class Flashcard {
 
     // Many flashcards belong to one topic
     @ManyToOne
-    @JoinColumn(name = "topic_id", nullable = false)
+    @JoinColumn(name = "topic_id")
+    @JsonBackReference
     private Topic topic;
 
     @Column(nullable = false)
