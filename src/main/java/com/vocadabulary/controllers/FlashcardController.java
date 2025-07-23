@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("t/flashcards")
+@RequestMapping("api/flashcards")
 public class FlashcardController {
 
     private final FlashcardService flashcardService;
