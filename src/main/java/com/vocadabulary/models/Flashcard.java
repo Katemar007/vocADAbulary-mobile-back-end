@@ -43,6 +43,8 @@ public class Flashcard {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    private Long createdBy;
+
     // Constructors
     public Flashcard() {}
 
@@ -126,5 +128,13 @@ public class Flashcard {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+        public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
     }
 }

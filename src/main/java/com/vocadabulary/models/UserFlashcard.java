@@ -17,12 +17,12 @@ public class UserFlashcard {
     @EmbeddedId
     private UserFlashcardId id;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @MapsId("userId")  // Maps userId attribute of embedded id
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @MapsId("flashcardId")  // Maps flashcardId attribute of embedded id
     @JoinColumn(name = "flashcard_id")
     private Flashcard flashcard;

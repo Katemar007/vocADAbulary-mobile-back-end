@@ -46,12 +46,12 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id:\\d+}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+    // @GetMapping("/{id:\\d+}")
+    // public ResponseEntity<User> getUser(@PathVariable Long id) {
+    //     return userService.getUserById(id)
+    //             .map(ResponseEntity::ok)
+    //             .orElse(ResponseEntity.notFound().build());
+    // }
 
     @PostMapping
     public User createUser(@RequestBody User user) {
