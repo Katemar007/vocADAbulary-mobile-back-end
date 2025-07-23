@@ -13,13 +13,13 @@ public class UserFlashcard {
     private UserFlashcardId id;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(optional = true)
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(optional = true)
     @MapsId("flashcardId")
     @JoinColumn(name = "flashcard_id")
     private Flashcard flashcard;
