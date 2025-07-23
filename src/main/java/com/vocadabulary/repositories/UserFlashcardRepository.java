@@ -1,3 +1,5 @@
+package com.vocadabulary.repositories;
+
 import com.vocadabulary.models.UserFlashcard;
 import com.vocadabulary.models.UserFlashcardId;
 import org.springframework.data.jpa.repository.JpaRepository;
