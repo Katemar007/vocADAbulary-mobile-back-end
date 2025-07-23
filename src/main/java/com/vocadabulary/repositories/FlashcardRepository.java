@@ -2,11 +2,13 @@ package com.vocadabulary.repositories;
 
 import com.vocadabulary.models.Flashcard;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-@Repository
+
 public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
-    List<Flashcard> findByTopicId(Long topicId);
+    @Query("SELECT f FROM Flashcard f JOIN UserFlashcard uf ON f.id = uf.id.flashcardId WHERE uf.id.userId = :userId")
+    List<Flashcard> findFlashcardsInUserWallet(@Param("userId") long userId);
 }
