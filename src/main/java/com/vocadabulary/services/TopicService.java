@@ -20,6 +20,7 @@ public class TopicService {
     }
 
     public Topic getTopicById(Long id) {
-        return topicRepository.findById(id).orElse(null);
+        return topicRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Topic not found for ID: " + id));
     }
 }

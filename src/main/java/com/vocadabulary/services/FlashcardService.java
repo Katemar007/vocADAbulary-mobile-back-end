@@ -4,11 +4,13 @@ import com.vocadabulary.auth.MockUser;
 import com.vocadabulary.auth.MockUserContext;
 import com.vocadabulary.models.Flashcard;
 import com.vocadabulary.models.User;
+import com.vocadabulary.models.Topic;
 import com.vocadabulary.models.UserFlashcard;
 import com.vocadabulary.models.UserFlashcardId;
 import com.vocadabulary.repositories.FlashcardRepository;
 import com.vocadabulary.repositories.UserFlashcardRepository;
 import com.vocadabulary.repositories.UserRepository;
+import com.vocadabulary.services.TopicService;
 import org.springframework.stereotype.Service;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 
@@ -25,18 +27,27 @@ public class FlashcardService {
     private final FlashcardRepository flashcardRepo;
     private final UserFlashcardRepository userFlashcardRepo;
     private final UserRepository userRepo;
-    public FlashcardService(FlashcardRepository flashcardRepo, UserFlashcardRepository userFlashcardRepo, UserRepository userRepo) {
+    private final TopicService topicService;
+
+    public FlashcardService(FlashcardRepository flashcardRepo, UserFlashcardRepository userFlashcardRepo, UserRepository userRepo, TopicService topicService) {
         this.flashcardRepo = flashcardRepo;
         this.userFlashcardRepo = userFlashcardRepo;
         this.userRepo = userRepo;
+        this.topicService = topicService;
     }
     // ✅ Everyone can see all flashcards
     public List<Flashcard> getAllFlashcards() {
         return flashcardRepo.findAll();
     }
 
+    public List<Flashcard> getFlashcardsByTopicId(Long topicId) {
+        return flashcardRepo.findByTopicId(topicId);
+    }
+
     // ✅ Create flashcard (record creator's ID in `createdBy`)
-    public Flashcard createFlashcard(Flashcard flashcard) {
+    public Flashcard createFlashcardInTopic(Long topicId, Flashcard flashcard) {
+        Topic topic = topicService.getTopicById(topicId);
+
         MockUser currentUser = MockUserContext.getCurrentUser();
 
         if (currentUser == null) {
@@ -158,11 +169,8 @@ public class FlashcardService {
 
     userFlashcardRepo.deleteById(userFlashcardId);
 }
-    //     userFlashcardRepo.deleteByUserIdAndFlashcardId(currentUser.getId(), flashcardId);
-    // }
 
-    // ✅ Get all flashcards in the user's wallet
-  // ✅ Get all flashcards in wallet (no status filter)
+    // ✅ Get all flashcards in wallet (no status filter)
     public List<WalletFlashcardDTO> getAllWalletFlashcards() {
         MockUser currentUser = MockUserContext.getCurrentUser();
 

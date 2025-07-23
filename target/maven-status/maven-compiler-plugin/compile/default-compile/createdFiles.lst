@@ -6,7 +6,6 @@ com/vocadabulary/models/Flashcard.class
 com/vocadabulary/models/Quiz.class
 com/vocadabulary/models/UserQuizProgress.class
 com/vocadabulary/repositories/UserRepository.class
-com/vocadabulary/controllers/FlashcardController.class
 com/vocadabulary/models/QuizAnswer.class
 com/vocadabulary/models/Topic.class
 com/vocadabulary/models/UserFlashcard.class

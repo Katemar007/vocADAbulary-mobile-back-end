@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/flashcards")
+@RequestMapping("t/flashcards")
 public class FlashcardController {
 
     private final FlashcardService flashcardService;
@@ -66,10 +66,13 @@ public class FlashcardController {
     //     return flashcardService.getWalletFlashcardsByStatus(status);
     // }
 
-    // ✅ Create a new flashcard
+    // ✅ Create a new flashcard, topic ID is required
     @PostMapping
     public Flashcard createFlashcard(@RequestBody Flashcard flashcard) {
-        return flashcardService.createFlashcard(flashcard);
+        if (flashcard.getTopic() == null || flashcard.getTopic().getId() == null) {
+            throw new IllegalArgumentException("Flashcard must be assigned to a topic");
+    }
+        return flashcardService.createFlashcardInTopic(flashcard.getTopic().getId(), flashcard);
     }
 
     // ✅ Update a flashcard (if user is creator or admin)

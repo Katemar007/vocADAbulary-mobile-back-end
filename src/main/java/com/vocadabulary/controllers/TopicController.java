@@ -29,9 +29,16 @@ public class TopicController {
     public Topic getTopicById(@PathVariable Long id) {
         return topicService.getTopicById(id);
     }
-
+    // get flashcards by topic id
     @GetMapping("/{id}/flashcards")
     public List<Flashcard> getFlashcardsByTopicId(@PathVariable("id") Long topicId) {
         return flashcardService.getFlashcardsByTopicId(topicId);
     }
+    // create a flashcard in a topic
+    @PostMapping("/{id}/flashcards")
+    public Flashcard createFlashcardInTopic(
+        @PathVariable("id") Long topicId,
+        @RequestBody Flashcard flashcard) {
+    return flashcardService.createFlashcardInTopic(topicId, flashcard);
+}
 }
