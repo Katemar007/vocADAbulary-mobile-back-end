@@ -30,6 +30,10 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepo.findAll();
     }
+
+    public Optional<User> getUserByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
 // Uncomment this method to test the MockUserContext
     // public Optional<User> getUserById(Long id) {
     //     return userRepo.findById(id);
