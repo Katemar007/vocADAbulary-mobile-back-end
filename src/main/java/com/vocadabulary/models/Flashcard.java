@@ -52,7 +52,7 @@ public class Flashcard {
     public Flashcard() {}
 
     public Flashcard(Topic topic, String word, String definition, String example,
-                    String synonyms, String phonetic, String audioUrl, LocalDateTime createdAt) {
+                    String synonyms, String phonetic, String audioUrl, LocalDateTime createdAt, Long createdBy) {
         this.topic = topic;
         this.word = word;
         this.definition = definition;
@@ -61,6 +61,7 @@ public class Flashcard {
         this.phonetic = phonetic;
         this.audioUrl = audioUrl;
         this.createdAt = createdAt;
+        this.createdBy = createdBy;
     }
 
     // Getters and setters
@@ -133,11 +134,10 @@ public class Flashcard {
         this.createdAt = createdAt;
     }
 
-        public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
-    }
-
     public Long getCreatedBy() {
         return createdBy;
+    }
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
     }
 }
