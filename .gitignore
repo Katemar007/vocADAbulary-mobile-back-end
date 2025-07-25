@@ -26,3 +26,8 @@ replay_pid*
 .env
 .vscode/launch.json
 
+target/
+
+.expo/
+
+.idea/

@@ -1,34 +1,22 @@
 package com.vocadabulary.controllers;
+
 import com.vocadabulary.auth.MockUser;
 import com.vocadabulary.auth.MockUserContext;
 import com.vocadabulary.models.User;
 import com.vocadabulary.services.UserService;
 
 import jakarta.annotation.PostConstruct;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
-
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
-    // uncomment this method to test the MockUserContext
-    
-//     @GetMapping(path = "/test-auth")
-// public ResponseEntity<String> testAuth() {
-//     MockUser currentUser = MockUserContext.getCurrentUser();
-//     if (currentUser != null) {
-//         return ResponseEntity.ok("User: " + currentUser.getId() + ", Role: " + currentUser.getRole());
-//     } else {
-//         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No mock user set");
-//     }
-//     }
 
     private final UserService userService;
 
@@ -40,18 +28,34 @@ public class UserController {
     public void checkDbConnection() {
         System.out.println(">>> DB URL: " + System.getProperty("spring.datasource.url"));
     }
-    
+
+    // 🔐 Login endpoint using username only
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+        // 🔍 ADD THESE LINES:
+        System.out.println("🔐 Hit /login endpoint");
+        System.out.println("📨 Raw request: " + loginRequest);
+        System.out.println("📨 Username: " + loginRequest.getUsername());
+
+        String username = loginRequest.getUsername();
+
+        Optional<User> userOpt = userService.getUserByUsername(username);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            MockUser mockUser = new MockUser(user.getId(), "student"); // hardcoded role
+            return ResponseEntity.ok(mockUser);
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid username");
+        }
+    }
+
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
-
-    // @GetMapping("/{id:\\d+}")
-    // public ResponseEntity<User> getUser(@PathVariable Long id) {
-    //     return userService.getUserById(id)
-    //             .map(ResponseEntity::ok)
-    //             .orElse(ResponseEntity.notFound().build());
-    // }
 
     @PostMapping
     public User createUser(@RequestBody User user) {
@@ -70,4 +74,15 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    // 🔧 Optional: use this to check if mock user is set properly
+//    @GetMapping("/test-auth")
+//    public ResponseEntity<String> testAuth() {
+//        MockUser currentUser = MockUserContext.getCurrentUser();
+//        if (currentUser != null) {
+//            return ResponseEntity.ok("User: " + currentUser.getId() + ", Role: " + currentUser.getRole());
+//        } else {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No mock user set");
+//        }
+//    }
 }
