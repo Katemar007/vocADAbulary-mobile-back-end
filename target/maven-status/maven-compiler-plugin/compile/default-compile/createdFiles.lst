@@ -1,5 +1,6 @@
 com/vocadabulary/models/UserProgressSummary.class
 com/vocadabulary/repositories/TopicRepository.class
+com/vocadabulary/repositories/UserProgressSummaryRepository.class
 com/vocadabulary/models/User.class
 com/vocadabulary/VocadabularyApplication.class
 com/vocadabulary/services/UserService.class
@@ -10,11 +11,13 @@ com/vocadabulary/auth/MockUser.class
 com/vocadabulary/models/Quiz.class
 com/vocadabulary/services/TopicService.class
 com/vocadabulary/repositories/FlashcardRepository.class
+com/vocadabulary/services/UserProgressSummaryService.class
 com/vocadabulary/models/UserQuizProgress.class
 com/vocadabulary/auth/MockAuthInterceptor.class
 com/vocadabulary/repositories/UserRepository.class
 com/vocadabulary/auth/MockUserContext.class
 com/vocadabulary/controllers/FlashcardController.class
+com/vocadabulary/controllers/UserProgressController.class
 com/vocadabulary/controllers/TopicController.class
 com/vocadabulary/models/QuizAnswer.class
 com/vocadabulary/models/Topic.class

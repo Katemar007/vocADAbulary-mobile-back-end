@@ -5,6 +5,8 @@ import com.vocadabulary.services.FlashcardService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.vocadabulary.dto.FlashcardRequest;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 
 import java.util.List;
@@ -69,11 +71,19 @@ public class FlashcardController {
 
     // ✅ Create a new flashcard, topic ID is required
     @PostMapping
-    public Flashcard createFlashcard(@RequestBody Flashcard flashcard) {
-        if (flashcard.getTopic() == null || flashcard.getTopic().getId() == null) {
+    public Flashcard createFlashcard(@RequestBody FlashcardRequest request) {
+        if (request.getTopicId() == null){
             throw new IllegalArgumentException("Flashcard must be assigned to a topic");
     }
-        return flashcardService.createFlashcardInTopic(flashcard.getTopic().getId(), flashcard);
+            Flashcard flashcard = new Flashcard();
+    flashcard.setWord(request.getWord());
+    flashcard.setDefinition(request.getDefinition());
+    flashcard.setExample(request.getExample());
+    flashcard.setSynonyms(request.getSynonyms());
+    flashcard.setPhonetic(request.getPhonetic());
+    flashcard.setAudioUrl(request.getAudioUrl());
+
+    return flashcardService.createFlashcardInTopic(request.getTopicId(), flashcard);
     }
 
     // ✅ Update a flashcard (if user is creator or admin)

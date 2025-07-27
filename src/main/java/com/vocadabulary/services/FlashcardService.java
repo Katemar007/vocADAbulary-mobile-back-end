@@ -10,7 +10,6 @@ import com.vocadabulary.models.UserFlashcardId;
 import com.vocadabulary.repositories.FlashcardRepository;
 import com.vocadabulary.repositories.UserFlashcardRepository;
 import com.vocadabulary.repositories.UserRepository;
-import com.vocadabulary.services.TopicService;
 import org.springframework.stereotype.Service;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 
@@ -24,16 +23,19 @@ import org.slf4j.LoggerFactory;
 @Service
 public class FlashcardService {
     private static final Logger log = LoggerFactory.getLogger(FlashcardService.class);
+
     private final FlashcardRepository flashcardRepo;
     private final UserFlashcardRepository userFlashcardRepo;
     private final UserRepository userRepo;
     private final TopicService topicService;
+    private final UserProgressSummaryService progressSummaryService;
 
-    public FlashcardService(FlashcardRepository flashcardRepo, UserFlashcardRepository userFlashcardRepo, UserRepository userRepo, TopicService topicService) {
+    public FlashcardService(FlashcardRepository flashcardRepo, UserFlashcardRepository userFlashcardRepo, UserRepository userRepo, TopicService topicService, UserProgressSummaryService progressSummaryService) {
         this.flashcardRepo = flashcardRepo;
         this.userFlashcardRepo = userFlashcardRepo;
         this.userRepo = userRepo;
         this.topicService = topicService;
+        this.progressSummaryService = progressSummaryService;
     }
     // ✅ Everyone can see all flashcards
     public List<Flashcard> getAllFlashcards() {
@@ -54,7 +56,9 @@ public class FlashcardService {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
 
+        flashcard.setTopic(topic); // Set the topic for the flashcard
         flashcard.setCreatedBy(currentUser.getId()); // assumes Flashcard has createdBy field
+        flashcard.setCreatedAt(LocalDateTime.now()); // Set creation time
         return flashcardRepo.save(flashcard);
     }
 
@@ -84,6 +88,7 @@ public class FlashcardService {
     public void addToWallet(Long flashcardId) {
         MockUser currentUser = MockUserContext.getCurrentUser();
 
+
         if (currentUser == null) {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
@@ -111,6 +116,7 @@ public class FlashcardService {
         userFlashcard.setLastReviewed(LocalDateTime.now());
 
         userFlashcardRepo.save(userFlashcard);
+        progressSummaryService.refreshLastActive(currentUser.getId());
     }
 
     // ✅ Update a flashcard's status in the user's wallet
@@ -132,6 +138,7 @@ public class FlashcardService {
         userFlashcard.setLastReviewed(LocalDateTime.now());
 
         userFlashcardRepo.save(userFlashcard);
+        progressSummaryService.refreshLastActive(currentUser.getId());
     }
     // ✅ Get all flashcards in user's wallet filtered by status
     public List<WalletFlashcardDTO> getWalletFlashcardsByStatus(String status) {
@@ -168,6 +175,7 @@ public class FlashcardService {
         UserFlashcardId userFlashcardId = new UserFlashcardId(currentUser.getId(), flashcardId);
 
     userFlashcardRepo.deleteById(userFlashcardId);
+    progressSummaryService.refreshLastActive(currentUser.getId());
 }
 
     // ✅ Get all flashcards in wallet (no status filter)
@@ -208,16 +216,24 @@ public class FlashcardService {
             throw new IllegalStateException("You can only update your own flashcards");
         }
 
-    // Update fields
-    flashcard.setWord(updatedFlashcard.getWord());
-    flashcard.setDefinition(updatedFlashcard.getDefinition());
-    flashcard.setExample(updatedFlashcard.getExample());
-    flashcard.setSynonyms(updatedFlashcard.getSynonyms());
-    flashcard.setPhonetic(updatedFlashcard.getPhonetic());
-    flashcard.setAudioUrl(updatedFlashcard.getAudioUrl());
+        // Update fields
+        flashcard.setWord(updatedFlashcard.getWord());
+        flashcard.setDefinition(updatedFlashcard.getDefinition());
+        flashcard.setExample(updatedFlashcard.getExample());
+        flashcard.setSynonyms(updatedFlashcard.getSynonyms());
+        flashcard.setPhonetic(updatedFlashcard.getPhonetic());
+        flashcard.setAudioUrl(updatedFlashcard.getAudioUrl());
 
-    return flashcardRepo.save(flashcard);
-}
+        return flashcardRepo.save(flashcard);
+    }
+
+    // Record the view for progress summary OPTIONAL for the future
+    public void recordFlashcardView(Long flashcardId) {
+        MockUser currentUser = MockUserContext.getCurrentUser();
+        if (currentUser != null) {
+            progressSummaryService.refreshLastActive(currentUser.getId());
+        }
+    }
 }
 //  no mock user code
 

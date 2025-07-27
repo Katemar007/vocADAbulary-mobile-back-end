@@ -26,5 +26,11 @@ public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, Us
     @Modifying
     void deleteByUserIdAndFlashcardId(Long userId, Long flashcardId);
 
+    // Get all flashcards by user ID and status
+    int countByUserIdAndStatus(Long userId, String status);
+
     // Optional<UserFlashcard> findById(UserFlashcardId id);
+    int countByUserId(Long userId);
+
+    
 }
