@@ -44,7 +44,13 @@ public class QuizController {
     public QuizDTO getFirstQuizByTopic(@PathVariable Long topicId) {
         Quiz quiz = quizService.getFirstQuizByTopicId(topicId);
         if (quiz == null) return null;
-        return new QuizDTO(q.getId(), q.getTopic().getId());
+
+        return new QuizDTO(
+            quiz.getId(),
+            quiz.getTopic().getId(),
+            quiz.getTopic().getName(),
+            List.of()  // empty list since you're not returning questions here
+        );
     }
 
     @GetMapping("/{id}")
