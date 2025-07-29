@@ -92,4 +92,11 @@ public void deleteUser(Long id) {
 
     userRepo.deleteById(id);
 }
+
+public Optional<User> getUserById(Long id) {
+    // TODO: Implement this method to fetch user by id from your data source
+    // Example implementation if you have a userRepository:
+    // return userRepository.findById(id);
+    return userRepo.findById(id);
+}
 }

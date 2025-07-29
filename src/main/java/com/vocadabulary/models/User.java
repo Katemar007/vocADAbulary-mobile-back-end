@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -29,6 +31,7 @@ public class User {
 
     //  One User → One ProgressSummary
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Prevents infinite recursion during serialization
     private UserProgressSummary userProgressSummary;
 
     //  One User → Many UserQuizProgress

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "user_progress_summary")
 public class UserProgressSummary {
@@ -15,6 +17,7 @@ public class UserProgressSummary {
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")
+    @JsonBackReference // Prevents infinite recursion during serialization
     private User user;
 
     @Column(name = "total_flashcards")
@@ -23,8 +26,8 @@ public class UserProgressSummary {
     @Column(name = "learned_flashcards")
     private int learnedFlashcards;
 
-    @Column(name = "failed_flashcards")
-    private int failedFlashcards;
+@Column(name = "in_progress_flashcards")
+private int inProgressFlashcards;
 
     @Column(name = "quizzes_attempted")
     private int quizzesAttempted;
@@ -78,12 +81,12 @@ public class UserProgressSummary {
         this.learnedFlashcards = learnedFlashcards;
     }
 
-    public int getFailedFlashcards() {
-        return failedFlashcards;
+    public int getInProgressFlashcards() {
+        return inProgressFlashcards;
     }
 
-    public void setFailedFlashcards(int failedFlashcards) {
-        this.failedFlashcards = failedFlashcards;
+    public void setInProgressFlashcards(int inProgressFlashcards) {
+        this.inProgressFlashcards = inProgressFlashcards;
     }
 
     public int getQuizzesAttempted() {
@@ -138,13 +141,13 @@ public class UserProgressSummary {
 
     public UserProgressSummary() {}
 
-    public UserProgressSummary(Long userId, int totalFlashcards, int learnedFlashcards, int failedFlashcards,
+    public UserProgressSummary(Long userId, int totalFlashcards, int learnedFlashcards, int inProgressFlashcards,
                                int quizzesAttempted, int quizzesPassed, float quizSuccessRate,
                                int sentencesBuilt, LocalDate lastActive, LocalDateTime updatedAt) {
         this.userId = userId;
         this.totalFlashcards = totalFlashcards;
         this.learnedFlashcards = learnedFlashcards;
-        this.failedFlashcards = failedFlashcards;
+        this.inProgressFlashcards = inProgressFlashcards;
         this.quizzesAttempted = quizzesAttempted;
         this.quizzesPassed = quizzesPassed;
         this.quizSuccessRate = quizSuccessRate;

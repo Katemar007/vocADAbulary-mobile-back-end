@@ -9,8 +9,19 @@ import java.util.List;
 
 
 public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
-    @Query("SELECT f FROM Flashcard f JOIN UserFlashcard uf ON f.id = uf.id.flashcardId WHERE uf.id.userId = :userId")
-    List<Flashcard> findFlashcardsInUserWallet(@Param("userId") long userId);
+    // @Query("SELECT f FROM Flashcard f JOIN UserFlashcard uf ON f.id = uf.id.flashcardId WHERE uf.id.userId = :userId")
+    // List<Flashcard> findFlashcardsInUserWallet(@Param("userId") long userId);
 
-    List<Flashcard> findByTopicId(Long topicId);
+    // Find flashcards by topic ID that are not learned by the user
+    @Query("""
+        SELECT f FROM Flashcard f
+        WHERE f.topic.id = :topicId
+        AND f.id NOT IN (
+            SELECT uf.id.flashcardId FROM UserFlashcard uf
+            WHERE uf.user.id = :userId AND uf.status = 'LEARNED'
+        )
+    """)
+    List<Flashcard> findActiveFlashcardsByTopicId(@Param("topicId") Long topicId,
+                                                @Param("userId") Long userId);
+
 }
