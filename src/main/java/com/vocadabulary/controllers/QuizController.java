@@ -53,6 +53,29 @@ public class QuizController {
         );
     }
 
+    @GetMapping("")
+    public List<QuizDTO> getAllQuizzes() {
+        List<Quiz> quizzes = quizService.getAllQuizzes();
+
+        return quizzes.stream()
+                .map(q -> new QuizDTO(
+                        q.getId(),
+                        q.getTopic().getId(),
+                        q.getTopic().getName(),
+                        q.getQuestions().stream().map(question -> new QuestionDTO(
+                                question.getId(),
+                                question.getQuestionText(),
+                                List.of(
+                                        new QuestionDTO.AnswerDTO(question.getCorrectAnswer(), true),
+                                        new QuestionDTO.AnswerDTO(question.getWrongAnswer1(), false),
+                                        new QuestionDTO.AnswerDTO(question.getWrongAnswer2(), false),
+                                        new QuestionDTO.AnswerDTO(question.getWrongAnswer3(), false)
+                                )
+                        )).toList()
+                ))
+                .toList();
+    }
+
     @GetMapping("/{id}")
     public QuizDTO getQuizById(@PathVariable Long id) {
         Quiz quiz = quizService.getQuizById(id);

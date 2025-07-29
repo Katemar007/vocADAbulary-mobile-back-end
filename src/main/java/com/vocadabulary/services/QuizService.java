@@ -26,4 +26,8 @@ public class QuizService {
         List<Quiz> quizzes = quizRepository.findByTopicId(topicId);
         return quizzes.isEmpty() ? null : quizzes.get(0);
     }
+
+    public List<Quiz> getAllQuizzes() {
+        return quizRepository.findAll();
+    }
 }
