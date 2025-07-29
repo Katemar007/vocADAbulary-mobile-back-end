@@ -1,0 +1,2 @@
+ALTER TABLE user_flashcards
+ADD COLUMN is_hidden BOOLEAN DEFAULT FALSE;

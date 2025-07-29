@@ -43,6 +43,9 @@ public class UserFlashcard {
     @Column(name = "in_wallet")
     private Boolean inWallet = true;
 
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden = false;
+
     
     // Getters and setters
 
@@ -92,5 +95,13 @@ public class UserFlashcard {
 
     public void setInWallet(Boolean inWallet) {
         this.inWallet = inWallet;
+    }
+
+        public boolean isHidden() {
+        return isHidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.isHidden = hidden;
     }
 }

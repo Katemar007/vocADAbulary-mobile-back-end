@@ -18,7 +18,7 @@ public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, Us
     List<UserFlashcard> findByUserId(Long userId);
 
     // All user_flashcards with a given status
-    List<UserFlashcard> findByUserIdAndStatus(Long userId, String status);
+    List<UserFlashcard> findByUserIdAndStatusAndIsHiddenFalse(Long userId, String status);
 
     // Count methods (still useful)
     int countByUserIdAndStatus(Long userId, String status);
@@ -27,16 +27,24 @@ public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, Us
     // Check if a flashcard entry already exists for the user
     boolean existsByUserIdAndFlashcardId(Long userId, Long flashcardId);
 
-    // 
-    List<UserFlashcard> findByUserIdAndInWalletTrue(Long userId);
+    // Flashcards in the user's wallet that are not hidden
+    List<UserFlashcard> findByUserIdAndInWalletTrueAndIsHiddenFalse(Long userId);
 
     // // Get flashcards in wallet
     // List<UserFlashcard> findByUserIdAndInWallet(Long userId, boolean inWallet);
 
     // Learned flashcards (regardless of wallet)
     @Query("SELECT uf FROM UserFlashcard uf JOIN FETCH uf.flashcard f " +
-           "WHERE uf.user.id = :userId AND uf.status = 'LEARNED'")
-    List<UserFlashcard> findLearnedFlashcards(@Param("userId") Long userId);
+           "WHERE uf.user.id = :userId AND uf.status = 'LEARNED' AND uf.isHidden = false")
+    List<UserFlashcard> findLearnedAndVisibleFlashcards(@Param("userId") Long userId);
+
+        // Learned and Hidden flashcards (regardless of wallet)
+    @Query("SELECT uf FROM UserFlashcard uf JOIN FETCH uf.flashcard f " +
+           "WHERE uf.user.id = :userId AND uf.status = 'LEARNED' AND uf.isHidden = true")
+    List<UserFlashcard> findLearnedAndHiddenFlashcards(@Param("userId") Long userId);
+
+    // Flashcards that are hidden
+    List<UserFlashcard> findByUserIdAndIsHiddenTrue(Long userId);
 
     // Flashcards currently in the wallet
     // @Query("SELECT uf FROM UserFlashcard uf JOIN FETCH uf.flashcard f " +

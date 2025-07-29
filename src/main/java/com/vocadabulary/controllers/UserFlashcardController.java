@@ -61,4 +61,12 @@ public class UserFlashcardController {
         userFlashcardService.updateFlashcardStatus(userId, flashcardId, newStatus);
         return Map.of("message", "Flashcard status updated to " + newStatus);
     }
+    /** Hide a flashcard (sets isHidden=true) */
+    @PutMapping("/{flashcardId}/hide")
+    public Map<String, String> hideFlashcard(
+            @PathVariable Long userId,
+            @PathVariable Long flashcardId) {
+        userFlashcardService.hideFlashcard(userId, flashcardId);
+        return Map.of("message", "Flashcard hidden successfully");
+    }
 }

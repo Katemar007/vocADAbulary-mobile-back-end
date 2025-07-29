@@ -41,7 +41,7 @@ public class UserFlashcardService {
     }
 
     public List<UserFlashcard> getFlashcardsByUserIdAndStatus(Long userId, String status) {
-        return userFlashcardRepo.findByUserIdAndStatus(userId, status);
+        return userFlashcardRepo.findByUserIdAndStatusAndIsHiddenFalse(userId, status);
     }
 
     // --- Wallet-specific methods ---
@@ -50,7 +50,7 @@ public class UserFlashcardService {
      * Returns flashcards currently in the user's wallet
      */
     public List<WalletFlashcardDTO> getWalletFlashcards(Long userId) {
-        return userFlashcardRepo.findByUserIdAndInWalletTrue(userId)
+        return userFlashcardRepo.findByUserIdAndInWalletTrueAndIsHiddenFalse(userId)
                 .stream()
                 .map(uf -> new WalletFlashcardDTO(
                         uf.getFlashcard().getId(),
@@ -65,7 +65,7 @@ public class UserFlashcardService {
      * Returns learned flashcards for this user (regardless of wallet)
      */
     public List<WalletFlashcardDTO> getLearnedFlashcards(Long userId) {
-        return userFlashcardRepo.findLearnedFlashcards(userId)
+        return userFlashcardRepo.findLearnedAndVisibleFlashcards(userId)
                 .stream()
                 .map(uf -> new WalletFlashcardDTO(
                         uf.getFlashcard().getId(),
@@ -79,7 +79,7 @@ public class UserFlashcardService {
 
     // GET In-progress flashcards
     public List<WalletFlashcardDTO> getInProgressFlashcards(Long userId) {
-    return userFlashcardRepo.findByUserIdAndStatus(userId, "IN_PROGRESS")
+    return userFlashcardRepo.findByUserIdAndStatusAndIsHiddenFalse(userId, "IN_PROGRESS")
             .stream()
             .map(uf -> new WalletFlashcardDTO(
                     uf.getFlashcard().getId(),
@@ -90,7 +90,15 @@ public class UserFlashcardService {
             ))
             .collect(Collectors.toList());
     }
-
+    // Hide a flashcard (sets isHidden=true)
+        @Transactional
+    public void hideFlashcard(Long userId, Long flashcardId) {
+        var id = new com.vocadabulary.models.UserFlashcardId(userId, flashcardId);
+        UserFlashcard uf = userFlashcardRepo.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
+        uf.setHidden(true);
+        userFlashcardRepo.save(uf);
+    }
     
     /** Remove a flashcard from the wallet (sets inWallet=false) */
     @DeleteMapping("/{flashcardId}/wallet")
