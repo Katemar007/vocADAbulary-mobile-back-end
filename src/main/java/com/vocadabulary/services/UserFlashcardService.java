@@ -64,10 +64,34 @@ public class UserFlashcardService {
     /**
      * Returns learned flashcards for this user (regardless of wallet)
      */
-    public List<UserFlashcard> getLearnedFlashcards(Long userId) {
-        return userFlashcardRepo.findLearnedFlashcards(userId);
+    public List<WalletFlashcardDTO> getLearnedFlashcards(Long userId) {
+        return userFlashcardRepo.findLearnedFlashcards(userId)
+                .stream()
+                .map(uf -> new WalletFlashcardDTO(
+                        uf.getFlashcard().getId(),
+                        uf.getFlashcard().getWord(),
+                        uf.getFlashcard().getDefinition(),
+                        uf.getStatus(),
+                        uf.getLastReviewed()
+                ))
+                .collect(Collectors.toList());
     }
 
+    // GET In-progress flashcards
+    public List<WalletFlashcardDTO> getInProgressFlashcards(Long userId) {
+    return userFlashcardRepo.findByUserIdAndStatus(userId, "IN_PROGRESS")
+            .stream()
+            .map(uf -> new WalletFlashcardDTO(
+                    uf.getFlashcard().getId(),
+                    uf.getFlashcard().getWord(),
+                    uf.getFlashcard().getDefinition(),
+                    uf.getStatus(),
+                    uf.getLastReviewed()
+            ))
+            .collect(Collectors.toList());
+    }
+
+    
     /** Remove a flashcard from the wallet (sets inWallet=false) */
     @DeleteMapping("/{flashcardId}/wallet")
     public Map<String, String> removeFromWallet(

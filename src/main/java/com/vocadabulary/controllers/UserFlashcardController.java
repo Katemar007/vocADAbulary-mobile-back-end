@@ -3,6 +3,7 @@ package com.vocadabulary.controllers;
 import com.vocadabulary.models.UserFlashcard;
 import com.vocadabulary.services.UserFlashcardService;
 import org.springframework.web.bind.annotation.*;
+import com.vocadabulary.dto.WalletFlashcardDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -24,20 +25,18 @@ public class UserFlashcardController {
     }
 
     @GetMapping("/in_progress")
-    public List<UserFlashcard> getInProgressFlashcards(@PathVariable Long userId) {
-        return userFlashcardService.getFlashcardsByUserIdAndStatus(userId, "IN_PROGRESS");
+    public List<WalletFlashcardDTO> getInProgressFlashcards(@PathVariable Long userId) {
+        return userFlashcardService.getInProgressFlashcards(userId);
     }
 
     @GetMapping("/learned")
-    public List<UserFlashcard> getLearnedFlashcards(@PathVariable Long userId) {
+    public List<WalletFlashcardDTO> getLearnedFlashcards(@PathVariable Long userId) {
         return userFlashcardService.getLearnedFlashcards(userId);
     }
 
     // Get flashcards in the user's wallet
     @GetMapping("/wallet")
-    public List<com.vocadabulary.dto.WalletFlashcardDTO> getWalletFlashcards(
-            @PathVariable Long userId
-    ) {
+    public List<WalletFlashcardDTO> getWalletFlashcards(@PathVariable Long userId) {
         return userFlashcardService.getWalletFlashcards(userId);
     }
 
