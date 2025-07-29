@@ -41,10 +41,19 @@ public class FlashcardService {
     public List<Flashcard> getAllFlashcards() {
         return flashcardRepo.findAll();
     }
-
+    // get active flashcards by topic ID that are not learned by the user
     public List<Flashcard> getFlashcardsByTopicId(Long topicId) {
-        return flashcardRepo.findByTopicId(topicId);
+        MockUser currentUser = MockUserContext.getCurrentUser();
+        if (currentUser == null) {
+            throw new IllegalStateException("Unauthorized: No mock user");
+        }
+
+        return flashcardRepo.findActiveFlashcardsByTopicId(topicId, currentUser.getId());
     }
+    // ✅ Get flashcard by ID
+    // public List<Flashcard> getFlashcardsByTopicId(Long topicId) {
+    //     return flashcardRepo.findByTopicId(topicId);
+    // }
 
     // ✅ Create flashcard (record creator's ID in `createdBy`)
     public Flashcard createFlashcardInTopic(Long topicId, Flashcard flashcard) {
@@ -110,7 +119,7 @@ public class FlashcardService {
         // Create UserFlashcard directly with IDs
         UserFlashcard userFlashcard = new UserFlashcard();
         userFlashcard.setId(new UserFlashcardId(currentUser.getId(), flashcardId));
-        userFlashcard.setStatus("in_wallet");
+        userFlashcard.setStatus("IN_PROGRESS");
         userFlashcard.setFlashcard(flashcard);
         userFlashcard.setUser(user);
         userFlashcard.setLastReviewed(LocalDateTime.now());
