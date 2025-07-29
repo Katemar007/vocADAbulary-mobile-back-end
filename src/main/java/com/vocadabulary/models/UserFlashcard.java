@@ -40,6 +40,10 @@ public class UserFlashcard {
         this.id = new UserFlashcardId(user.getId(), flashcard.getId());
     }
 
+    @Column(name = "in_wallet")
+    private Boolean inWallet = true;
+
+    
     // Getters and setters
 
     public UserFlashcardId getId() {
@@ -80,5 +84,13 @@ public class UserFlashcard {
 
     public void setLastReviewed(LocalDateTime lastReviewed) {
         this.lastReviewed = lastReviewed;
+    }
+
+        public Boolean getInWallet() {
+        return inWallet;
+    }
+
+    public void setInWallet(Boolean inWallet) {
+        this.inWallet = inWallet;
     }
 }

@@ -51,9 +51,10 @@ public class FlashcardService {
         return flashcardRepo.findActiveFlashcardsByTopicId(topicId, currentUser.getId());
     }
     // ✅ Get flashcard by ID
-    // public List<Flashcard> getFlashcardsByTopicId(Long topicId) {
-    //     return flashcardRepo.findByTopicId(topicId);
-    // }
+    public Flashcard getFlashcardById(Long id) {
+        return flashcardRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
+    }
 
     // ✅ Create flashcard (record creator's ID in `createdBy`)
     public Flashcard createFlashcardInTopic(Long topicId, Flashcard flashcard) {
@@ -68,9 +69,23 @@ public class FlashcardService {
         flashcard.setTopic(topic); // Set the topic for the flashcard
         flashcard.setCreatedBy(currentUser.getId()); // assumes Flashcard has createdBy field
         flashcard.setCreatedAt(LocalDateTime.now()); // Set creation time
-        return flashcardRepo.save(flashcard);
-    }
+        Flashcard saved = flashcardRepo.save(flashcard);
 
+        User user = userRepo.findById(currentUser.getId())
+        .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + currentUser.getId()));
+        // Create UserFlashcard to track this flashcard for the user
+        UserFlashcard userFlashcard = new UserFlashcard();
+        userFlashcard.setId(new UserFlashcardId(user.getId(), saved.getId()));
+        userFlashcard.setUser(user);
+        userFlashcard.setFlashcard(saved);
+        userFlashcard.setStatus("IN_PROGRESS");  // Default status
+        userFlashcard.setInWallet(true);         // Optional: add to wallet automatically
+        userFlashcard.setLastReviewed(LocalDateTime.now());
+
+        userFlashcardRepo.save(userFlashcard);
+
+        return saved;
+}
     // ✅ Delete flashcard (Admins can delete anything; users can delete their own)
     public void deleteFlashcard(Long id) {
         MockUser currentUser = MockUserContext.getCurrentUser();
@@ -97,115 +112,47 @@ public class FlashcardService {
     public void addToWallet(Long flashcardId) {
         MockUser currentUser = MockUserContext.getCurrentUser();
 
-
         if (currentUser == null) {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
 
-        // ✅ Get User
+        // Get User
         User user = userRepo.findById(currentUser.getId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + currentUser.getId()));
+            .orElseThrow(() -> new IllegalArgumentException(
+                "User not found for ID: " + currentUser.getId()));
 
-        // ✅ Get Flashcard from DB
+        // Get Flashcard
         Flashcard flashcard = flashcardRepo.findById(flashcardId)
-        .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
+            .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
 
-        // Check if flashcard is already in wallet
-        boolean exists = userFlashcardRepo.existsByUserIdAndFlashcardId(currentUser.getId(), flashcardId);
-        if (exists) {
-            throw new IllegalStateException("Flashcard is already in your wallet");
+        // Check if a UserFlashcard already exists for this user/flashcard
+        Optional<UserFlashcard> existing = userFlashcardRepo.findById(
+            new UserFlashcardId(currentUser.getId(), flashcardId));
+
+        UserFlashcard userFlashcard;
+        if (existing.isPresent()) {
+            // If it exists, just mark it as inWallet again
+            userFlashcard = existing.get();
+            if (Boolean.TRUE.equals(userFlashcard.getInWallet())) {
+                throw new IllegalStateException("Flashcard is already in your wallet");
+            }
+            userFlashcard.setInWallet(true);
+            userFlashcard.setStatus("IN_PROGRESS");
+        } else {
+            // Otherwise, create a new record
+            userFlashcard = new UserFlashcard();
+            userFlashcard.setId(new UserFlashcardId(currentUser.getId(), flashcardId));
+            userFlashcard.setStatus("IN_PROGRESS");
+            userFlashcard.setFlashcard(flashcard);
+            userFlashcard.setUser(user);
+            userFlashcard.setInWallet(true);
         }
 
-        // Create UserFlashcard directly with IDs
-        UserFlashcard userFlashcard = new UserFlashcard();
-        userFlashcard.setId(new UserFlashcardId(currentUser.getId(), flashcardId));
-        userFlashcard.setStatus("IN_PROGRESS");
-        userFlashcard.setFlashcard(flashcard);
-        userFlashcard.setUser(user);
+        // Always update last reviewed time
         userFlashcard.setLastReviewed(LocalDateTime.now());
 
         userFlashcardRepo.save(userFlashcard);
         progressSummaryService.refreshLastActive(currentUser.getId());
-    }
-
-    // ✅ Update a flashcard's status in the user's wallet
-    public void updateFlashcardStatusInWallet(Long flashcardId, String newStatus) {
-        MockUser currentUser = MockUserContext.getCurrentUser();
-
-        if (currentUser == null) {
-            throw new IllegalStateException("Unauthorized: No mock user");
-        }
-
-        // ✅ Fetch the UserFlashcard
-        UserFlashcardId userFlashcardId = new UserFlashcardId(currentUser.getId(), flashcardId);
-
-        UserFlashcard userFlashcard = userFlashcardRepo.findById(userFlashcardId)
-            .orElseThrow(() -> new IllegalArgumentException("Flashcard not found in wallet"));
-
-        // ✅ Update the status
-        userFlashcard.setStatus(newStatus);
-        userFlashcard.setLastReviewed(LocalDateTime.now());
-
-        userFlashcardRepo.save(userFlashcard);
-        progressSummaryService.refreshLastActive(currentUser.getId());
-    }
-    // ✅ Get all flashcards in user's wallet filtered by status
-    public List<WalletFlashcardDTO> getWalletFlashcardsByStatus(String status) {
-        MockUser currentUser = MockUserContext.getCurrentUser();
-
-        if (currentUser == null) {
-            throw new IllegalStateException("Unauthorized: No mock user");
-        }
-
-        // Fetch UserFlashcards with status
-        List<UserFlashcard> userFlashcards = userFlashcardRepo.findByUserIdAndStatus(
-            currentUser.getId(), status);
-
-        // Map to DTO
-        return userFlashcards.stream()
-                .map(uf -> new WalletFlashcardDTO(
-                    uf.getFlashcard().getId(),
-                    uf.getFlashcard().getWord(),
-                    uf.getFlashcard().getDefinition(),
-                    uf.getStatus(),
-                    uf.getLastReviewed()
-                ))
-                .toList();
-    }
-        
-    // ✅ Remove a flashcard from user's wallet
-    public void removeFromWallet(Long flashcardId) {
-        MockUser currentUser = MockUserContext.getCurrentUser();
-
-        if (currentUser == null) {
-            throw new IllegalStateException("Unauthorized: No mock user");
-        }
-            // Composite key for UserFlashcard
-        UserFlashcardId userFlashcardId = new UserFlashcardId(currentUser.getId(), flashcardId);
-
-    userFlashcardRepo.deleteById(userFlashcardId);
-    progressSummaryService.refreshLastActive(currentUser.getId());
-}
-
-    // ✅ Get all flashcards in wallet (no status filter)
-    public List<WalletFlashcardDTO> getAllWalletFlashcards() {
-        MockUser currentUser = MockUserContext.getCurrentUser();
-
-        if (currentUser == null) {
-            throw new IllegalStateException("Unauthorized: No mock user");
-        }
-
-        List<UserFlashcard> userFlashcards = userFlashcardRepo.findByUserId(currentUser.getId());
-
-        return userFlashcards.stream()
-                .map(uf -> new WalletFlashcardDTO(
-                        uf.getFlashcard().getId(),
-                        uf.getFlashcard().getWord(),
-                        uf.getFlashcard().getDefinition(),
-                        uf.getStatus(),
-                        uf.getLastReviewed()
-                ))
-                .toList();
     }
 
         // ✅ Update a flashcard (if user is creator or admin)
@@ -244,51 +191,3 @@ public class FlashcardService {
         }
     }
 }
-//  no mock user code
-
-// package com.vocadabulary.services;
-
-// import com.vocadabulary.models.Flashcard;
-// import com.vocadabulary.repositories.FlashcardRepository;
-// import org.springframework.stereotype.Service;
-
-// import java.util.List;
-// import java.util.Optional;
-
-// @Service
-// public class FlashcardService {
-//     private final FlashcardRepository flashcardRepo;
-
-//     public FlashcardService(FlashcardRepository flashcardRepo) {
-//         this.flashcardRepo = flashcardRepo;
-//     }
-
-//     public List<Flashcard> getAllFlashcards() {
-//         return flashcardRepo.findAll();
-//     }
-
-//     public Optional<Flashcard> getFlashcardById(Long id) {
-//         return flashcardRepo.findById(id);
-//     }
-
-//     public Flashcard createFlashcard(Flashcard flashcard) {
-//         return flashcardRepo.save(flashcard);
-//     }
-
-//     public Flashcard updateFlashcard(Long id, Flashcard updatedFlashcard) {
-//         return flashcardRepo.findById(id).map(flashcard -> {
-//             flashcard.setWord(updatedFlashcard.getWord());
-//             flashcard.setDefinition(updatedFlashcard.getDefinition());
-//             flashcard.setExample(updatedFlashcard.getExample());
-//             flashcard.setSynonyms(updatedFlashcard.getSynonyms());
-//             flashcard.setPhonetic(updatedFlashcard.getPhonetic());
-//             flashcard.setAudioUrl(updatedFlashcard.getAudioUrl());
-//             // Update other fields as needed
-//             return flashcardRepo.save(flashcard);
-//         }).orElse(null);
-//     }
-
-//     public void deleteFlashcard(Long id) {
-//         flashcardRepo.deleteById(id);
-//     }
-// }
