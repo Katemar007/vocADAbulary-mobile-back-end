@@ -50,8 +50,8 @@ public class UserFlashcardService {
      * Returns flashcards currently in the user's wallet
      */
     public List<WalletFlashcardDTO> getWalletFlashcards(Long userId) {
-        return userFlashcardRepo.findByUserIdAndInWalletTrueAndIsHiddenFalse(userId)
-                .stream()
+        var t = userFlashcardRepo.findByUserIdAndInWalletTrueAndIsHiddenFalse(userId);
+        return t.stream()
                 .map(uf -> new WalletFlashcardDTO(
                         uf.getFlashcard().getId(),
                         uf.getFlashcard().getWord(),

@@ -2,6 +2,8 @@ package com.vocadabulary.controllers;
 
 import com.vocadabulary.models.UserFlashcard;
 import com.vocadabulary.services.UserFlashcardService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 
@@ -14,6 +16,7 @@ import java.util.Map;
 public class UserFlashcardController {
 
     private final UserFlashcardService userFlashcardService;
+    private final Logger logger = LoggerFactory.getLogger(UserFlashcardController.class);
 
     public UserFlashcardController(UserFlashcardService userFlashcardService) {
         this.userFlashcardService = userFlashcardService;
@@ -37,6 +40,7 @@ public class UserFlashcardController {
     // Get flashcards in the user's wallet
     @GetMapping("/wallet")
     public List<WalletFlashcardDTO> getWalletFlashcards(@PathVariable Long userId) {
+        logger.info("getWalletFlashcards: {}", userId);
         return userFlashcardService.getWalletFlashcards(userId);
     }
 

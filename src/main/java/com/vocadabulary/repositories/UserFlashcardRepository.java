@@ -28,7 +28,9 @@ public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, Us
     boolean existsByUserIdAndFlashcardId(Long userId, Long flashcardId);
 
     // Flashcards in the user's wallet that are not hidden
-    List<UserFlashcard> findByUserIdAndInWalletTrueAndIsHiddenFalse(Long userId);
+    @Query("SELECT uf FROM UserFlashcard uf JOIN FETCH uf.flashcard f " +
+           "WHERE uf.user.id = :userId AND uf.inWallet = true AND uf.isHidden = false")
+    List<UserFlashcard> findByUserIdAndInWalletTrueAndIsHiddenFalse(@Param("userId") Long userId);
 
     // // Get flashcards in wallet
     // List<UserFlashcard> findByUserIdAndInWallet(Long userId, boolean inWallet);
