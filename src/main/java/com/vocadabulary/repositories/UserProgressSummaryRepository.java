@@ -10,5 +10,10 @@ import org.springframework.data.repository.query.Param;
 public interface UserProgressSummaryRepository extends JpaRepository<UserProgressSummary, Long> {
 
     // Optional: you can add custom queries here later if needed
+    @Query("SELECT COUNT(uf) FROM UserFlashcard uf WHERE uf.user.id = :userId AND uf.status = 'IN_PROGRESS'")
+       long countInProgressByUser(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(uf) FROM UserFlashcard uf WHERE uf.user.id = :userId AND uf.status = 'LEARNED'")
+       long countLearnedByUser(@Param("userId") Long userId);
    
 }

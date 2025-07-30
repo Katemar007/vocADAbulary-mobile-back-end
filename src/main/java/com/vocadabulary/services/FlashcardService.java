@@ -10,6 +10,7 @@ import com.vocadabulary.models.UserFlashcardId;
 import com.vocadabulary.repositories.FlashcardRepository;
 import com.vocadabulary.repositories.UserFlashcardRepository;
 import com.vocadabulary.repositories.UserRepository;
+import com.vocadabulary.services.UserProgressSummaryService;
 import org.springframework.stereotype.Service;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 
