@@ -1,14 +1,17 @@
--- 1. Drop quiz_answers (no longer needed)
-DROP TABLE IF EXISTS quiz_answers;
-
--- 2. Clean up quiz_results table to only store one record per attempt
+-- 1. Drop the old column if it exists
 ALTER TABLE quiz_results
-    DROP COLUMN IF EXISTS is_correct, -- remove old column if exists (we'll re-add to enforce consistency)
-    ADD COLUMN is_correct BOOLEAN NOT NULL;
+    DROP COLUMN IF EXISTS is_correct;
 
--- 3. (Optional) Ensure quiz_results has the correct constraints
+-- 2. Add the column as nullable first
 ALTER TABLE quiz_results
-    ADD CONSTRAINT fk_quiz_results_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+    ADD COLUMN is_correct BOOLEAN;
 
+-- 3. Set default values for existing rows
+-- (Here we set everything to FALSE initially, you can adjust if needed)
+UPDATE quiz_results
+SET is_correct = FALSE
+WHERE is_correct IS NULL;
+
+-- 4. Make the column NOT NULL after data is populated
 ALTER TABLE quiz_results
-    ADD CONSTRAINT fk_quiz_results_quiz FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE;
+    ALTER COLUMN is_correct SET NOT NULL;
