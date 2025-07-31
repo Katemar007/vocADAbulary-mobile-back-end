@@ -2,7 +2,6 @@ package com.vocadabulary.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "quizzes")
@@ -12,52 +11,26 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Many quizzes belong to one topic
-    @ManyToOne
-    @JoinColumn(name = "topic_id", nullable = false)
-    private Topic topic;
+    @Column(name = "topic_id")
+    private Long topicId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // One quiz has many questions
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuizQuestion> questions;
+    @Column(name = "question_text")
+    private String questionText;
 
-    // Constructors
-    public Quiz() {}
+    @Column(name = "correct_answer")
+    private String correctAnswer;
 
-    public Quiz(Topic topic, LocalDateTime createdAt) {
-        this.topic = topic;
-        this.createdAt = createdAt;
-    }
+    @Column(name = "wrong_answer_1")
+    private String wrongAnswer1;
 
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "wrong_answer_2")
+    private String wrongAnswer2;
 
-    public Topic getTopic() {
-        return topic;
-    }
+    @Column(name = "wrong_answer_3")
+    private String wrongAnswer3;
 
-    public void setTopic(Topic topic) {
-        this.topic = topic;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public List<QuizQuestion> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(List<QuizQuestion> questions) {
-        this.questions = questions;
-    }
+    // Getters and Setters
 }
