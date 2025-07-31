@@ -1,3 +1,7 @@
+-- =========================
+-- SEED DATA
+-- =========================
+
 -- Users
 INSERT INTO users (id, username, email, created_at) VALUES
 (3, 'liam.code', 'liam@example.com', NOW()),
@@ -9,12 +13,12 @@ INSERT INTO users (id, username, email, created_at) VALUES
 
 -- Topics
 INSERT INTO topics (id, name, created_at) VALUES
-(3, 'Spring Boot', NOW()),
-(4, 'React Native', NOW()),
-(5, 'Database Design', NOW()),
-(6, 'Debugging Techniques', NOW()),
-(7, 'Unit Testing', NOW()),
-(8, 'Java Basics', NOW());
+(1, 'Java Basics', NOW()),
+(2, 'Spring Boot', NOW()),
+(3, 'React Native', NOW()),
+(4, 'Database Design', NOW()),
+(5, 'Debugging Techniques', NOW()),
+(6, 'Unit Testing', NOW());
 
 -- Flashcards for Java Basics (topic_id = 1)
 INSERT INTO flashcards (id, topic_id, word, definition, example, synonyms, phonetic, audio_url, created_at) VALUES
@@ -60,38 +64,66 @@ INSERT INTO flashcards (id, topic_id, word, definition, example, synonyms, phone
 
 -- UserFlashcard associations
 INSERT INTO user_flashcards (user_id, flashcard_id, status, last_reviewed) VALUES
--- Emma (user_id = 2)
 (8, 1, 'IN_PROGRESS', NOW()),
 (8, 2, 'LEARNED', NOW()),
 (8, 3, 'LEARNED', NOW()),
 (8, 4, 'FAVORITE', NOW()),
-
--- Liam (user_id = 3)
 (3, 5, 'IN_PROGRESS', NOW()),
 (3, 6, 'LEARNED', NOW()),
 (3, 7, 'IN_PROGRESS', NOW()),
 (3, 8, 'FAVORITE', NOW()),
-
--- Olivia (user_id = 4)
 (4, 9, 'LEARNED', NOW()),
 (4, 10, 'IN_PROGRESS', NOW()),
 (4, 11, 'LEARNED', NOW()),
 (4, 12, 'FAVORITE', NOW()),
-
--- Noah (user_id = 5)
 (5, 13, 'LEARNED', NOW()),
 (5, 14, 'IN_PROGRESS', NOW()),
 (5, 15, 'FAVORITE', NOW()),
 (5, 16, 'IN_PROGRESS', NOW()),
-
--- Ava (user_id = 6)
 (6, 17, 'IN_PROGRESS', NOW()),
 (6, 18, 'LEARNED', NOW()),
 (6, 19, 'LEARNED', NOW()),
 (6, 20, 'FAVORITE', NOW()),
-
--- Ethan (user_id = 7)
 (7, 21, 'FAVORITE', NOW()),
 (7, 22, 'LEARNED', NOW()),
 (7, 23, 'IN_PROGRESS', NOW()),
 (7, 24, 'IN_PROGRESS', NOW());
+
+
+INSERT INTO quizzes (id, topic_id, question_text, correct_answer, wrong_answer_1, wrong_answer_2, wrong_answer_3, created_at) VALUES
+-- Java Basics
+(1, 1, 'What is a class in Java?', 'A blueprint for creating objects', 'A single object instance', 'A data type', 'A variable', NOW()),
+(2, 1, 'What is an object in Java?', 'An instance of a class', 'A method', 'A template', 'A package', NOW()),
+(3, 1, 'What is a method?', 'A function defined in a class', 'A database query', 'A constructor', 'A field', NOW()),
+-- Spring Boot
+(4, 2, 'What does @RestController do?', 'Marks a class as a REST controller', 'Connects to the database', 'Creates a new bean', 'Registers a filter', NOW()),
+(5, 2, 'What is Dependency Injection?', 'A design pattern for providing dependencies', 'A database configuration', 'An annotation processor', 'A testing tool', NOW()),
+(6, 2, 'What is application.properties used for?', 'Spring Boot configuration', 'Defining React components', 'Database queries', 'Java compilation', NOW()),
+-- React Native
+(7, 3, 'What is a component?', 'A reusable piece of UI', 'A database field', 'A class variable', 'A REST endpoint', NOW()),
+(8, 3, 'What is state?', 'An object for holding component data', 'A network request', 'A UI library', 'A database key', NOW()),
+(9, 3, 'What are props?', 'Inputs passed to components', 'Outputs from APIs', 'Default class values', 'Local variables', NOW()),
+-- Database Design
+(10, 4, 'What is a primary key?', 'A unique identifier for records', 'A foreign reference', 'A database view', 'A stored procedure', NOW()),
+(11, 4, 'What is a foreign key?', 'A link to another table', 'A primary identifier', 'A UI component', 'A SQL index', NOW()),
+(12, 4, 'What is normalization?', 'Reducing data redundancy', 'Adding duplicate data', 'Removing constraints', 'Creating indexes', NOW()),
+-- Debugging
+(13, 5, 'What is a breakpoint?', 'A point where code execution stops', 'A syntax error', 'A compiler warning', 'A database lock', NOW()),
+(14, 5, 'What is a stack trace?', 'A report of method calls at crash time', 'A memory dump', 'A compiled log', 'A thread lock', NOW()),
+(15, 5, 'What is console logging?', 'Printing debug information', 'Creating REST endpoints', 'Optimizing SQL queries', 'Testing user input', NOW()),
+-- Unit Testing
+(16, 6, 'What is JUnit?', 'A testing framework for Java', 'A UI library', 'A Java compiler', 'A SQL migration tool', NOW()),
+(17, 6, 'What is an assertion?', 'A statement to verify expected results', 'A Java keyword', 'A logging method', 'An IDE shortcut', NOW()),
+(18, 6, 'What is mocking?', 'Simulating dependencies for testing', 'Writing database migrations', 'Deploying code to production', 'Compiling Java classes', NOW());
+
+INSERT INTO user_quiz_attempts (user_id, quiz_id, is_passed, taken_at) VALUES
+(8, 1, TRUE, NOW()),
+(8, 2, FALSE, NOW()),
+(8, 3, TRUE, NOW()),
+(3, 4, TRUE, NOW()),
+(3, 5, FALSE, NOW()),
+(4, 7, TRUE, NOW()),
+(4, 8, TRUE, NOW()),
+(5, 10, TRUE, NOW()),
+(6, 13, FALSE, NOW()),
+(7, 16, TRUE, NOW());
