@@ -3,6 +3,7 @@ package com.vocadabulary.controllers;
 import com.vocadabulary.auth.MockUser;
 import com.vocadabulary.auth.MockUserContext;
 import com.vocadabulary.models.User;
+import com.vocadabulary.requests.LoginRequest;
 import com.vocadabulary.services.UserService;
 
 import jakarta.annotation.PostConstruct;
@@ -30,25 +31,43 @@ public class UserController {
     }
 
     // 🔐 Login endpoint using username only
+    // @PostMapping("/login")
+    // public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+    //     // 🔍 ADD THESE LINES:
+    //     System.out.println("🔐 Hit /login endpoint");
+    //     System.out.println("📨 Raw request: " + loginRequest);
+    //     System.out.println("📨 Username: " + loginRequest.getUsername());
+
+    //     String username = loginRequest.getUsername();
+
+    //     Optional<User> userOpt = userService.getUserByUsername(username);
+
+    //     if (userOpt.isPresent()) {
+    //         User user = userOpt.get();
+    //         MockUser mockUser = new MockUser(user.getId(), "student"); // hardcoded role
+    //         return ResponseEntity.ok(mockUser);
+    //     } else {
+    //         return ResponseEntity
+    //                 .status(HttpStatus.UNAUTHORIZED)
+    //                 .body("Invalid username");
+    //     }
+    // }
+
+
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
-        // 🔍 ADD THESE LINES:
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         System.out.println("🔐 Hit /login endpoint");
-        System.out.println("📨 Raw request: " + loginRequest);
         System.out.println("📨 Username: " + loginRequest.getUsername());
 
         String username = loginRequest.getUsername();
-
         Optional<User> userOpt = userService.getUserByUsername(username);
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            MockUser mockUser = new MockUser(user.getId(), "student"); // hardcoded role
+            MockUser mockUser = new MockUser(user.getId(), "student"); 
             return ResponseEntity.ok(mockUser);
         } else {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid username");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username");
         }
     }
 
