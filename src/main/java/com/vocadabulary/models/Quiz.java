@@ -2,6 +2,7 @@ package com.vocadabulary.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "quizzes")
@@ -16,7 +17,7 @@ public class Quiz {
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT NOW()")
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "question_text", nullable = false)
@@ -33,6 +34,14 @@ public class Quiz {
 
     @Column(name = "wrong_answer_3", nullable = false)
     private String wrongAnswer3;
+
+    // One Quiz → Many UserQuizAttempts
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserQuizAttempt> userQuizAttempts;
+
+    // One Quiz → Many UserQuizStatuses
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserQuizStatus> userQuizStatuses;
 
     // Constructors
     public Quiz() {}
@@ -105,5 +114,21 @@ public class Quiz {
 
     public void setWrongAnswer3(String wrongAnswer3) {
         this.wrongAnswer3 = wrongAnswer3;
+    }
+
+    public List<UserQuizAttempt> getUserQuizAttempts() {
+        return userQuizAttempts;
+    }
+
+    public void setUserQuizAttempts(List<UserQuizAttempt> userQuizAttempts) {
+        this.userQuizAttempts = userQuizAttempts;
+    }
+
+    public List<UserQuizStatus> getUserQuizStatuses() {
+        return userQuizStatuses;
+    }
+
+    public void setUserQuizStatuses(List<UserQuizStatus> userQuizStatuses) {
+        this.userQuizStatuses = userQuizStatuses;
     }
 }

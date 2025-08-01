@@ -1,10 +1,12 @@
 package com.vocadabulary.services;
 
+import com.vocadabulary.dto.QuizDTO;
 import com.vocadabulary.models.Quiz;
 import com.vocadabulary.repositories.QuizRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuizService {
@@ -15,13 +17,17 @@ public class QuizService {
         this.quizRepository = quizRepository;
     }
 
-    // Get all quizzes
-    public List<Quiz> getAllQuizzes() {
-        return quizRepository.findAll();
-    }
-
-    // Get quizzes by topic ID
-    public List<Quiz> getQuizzesByTopic(Long topicId) {
-        return quizRepository.findByTopicId(topicId);
+    public List<QuizDTO> getAllQuizzes() {
+        return quizRepository.findAll().stream()
+                .map(quiz -> new QuizDTO(
+                        quiz.getId(),
+                        quiz.getTopic().getId(),
+                        quiz.getQuestionText(),
+                        quiz.getCorrectAnswer(),
+                        quiz.getWrongAnswer1(),
+                        quiz.getWrongAnswer2(),
+                        quiz.getWrongAnswer3()
+                ))
+                .collect(Collectors.toList());
     }
 }

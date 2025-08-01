@@ -1,5 +1,9 @@
 package com.vocadabulary.repositories;
 
-public class UserQuizSummaryRepository {
-    
+import com.vocadabulary.models.UserQuizSummary;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserQuizSummaryRepository extends JpaRepository<UserQuizSummary, Long> {
 }

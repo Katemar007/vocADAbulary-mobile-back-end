@@ -3,7 +3,6 @@ package com.vocadabulary.models;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -18,85 +17,59 @@ public class User {
 
     private String email;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
-    //  One User → Many UserFlashcards
+    // One User → Many UserFlashcards
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<UserFlashcard> userFlashcards;
 
-    // One User → Many QuizResults
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuizResult> quizResults;
-
-    //  One User → One ProgressSummary
+    // One User → One ProgressSummary
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Prevents infinite recursion during serialization
+    @JsonManagedReference
     private UserProgressSummary userProgressSummary;
 
-    //  One User → Many UserQuizProgress
+    // One User → Many QuizAttempts
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserQuizProgress> userQuizProgress;
+    @JsonManagedReference
+    private List<UserQuizAttempt> userQuizAttempts;
+
+    // One User → One QuizSummary
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private UserQuizSummary userQuizSummary;
+
+    // One User → Many QuizStatus
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<UserQuizStatus> userQuizStatuses;
 
     // === Getters & Setters ===
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getEmail() {
-        return email;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public List<UserFlashcard> getUserFlashcards() { return userFlashcards; }
+    public void setUserFlashcards(List<UserFlashcard> userFlashcards) { this.userFlashcards = userFlashcards; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public UserProgressSummary getUserProgressSummary() { return userProgressSummary; }
+    public void setUserProgressSummary(UserProgressSummary userProgressSummary) { this.userProgressSummary = userProgressSummary; }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public List<UserQuizAttempt> getUserQuizAttempts() { return userQuizAttempts; }
+    public void setUserQuizAttempts(List<UserQuizAttempt> userQuizAttempts) { this.userQuizAttempts = userQuizAttempts; }
 
-    public List<UserFlashcard> getUserFlashcards() {
-        return userFlashcards;
-    }
+    public UserQuizSummary getUserQuizSummary() { return userQuizSummary; }
+    public void setUserQuizSummary(UserQuizSummary userQuizSummary) { this.userQuizSummary = userQuizSummary; }
 
-    public void setUserFlashcards(List<UserFlashcard> userFlashcards) {
-        this.userFlashcards = userFlashcards;
-    }
-
-    public List<QuizResult> getQuizResults() {
-        return quizResults;
-    }
-
-    public void setQuizResults(List<QuizResult> quizResults) {
-        this.quizResults = quizResults;
-    }
-
-    public UserProgressSummary getUserProgressSummary() {
-        return userProgressSummary;
-    }
-
-    public void setUserProgressSummary(UserProgressSummary userProgressSummary) {
-        this.userProgressSummary = userProgressSummary;
-    }
-
-    public List<UserQuizProgress> getUserQuizProgress() {
-        return userQuizProgress;
-    }
-
-    public void setUserQuizProgress(List<UserQuizProgress> userQuizProgress) {
-        this.userQuizProgress = userQuizProgress;
-    }
+    public List<UserQuizStatus> getUserQuizStatuses() { return userQuizStatuses; }
+    public void setUserQuizStatuses(List<UserQuizStatus> userQuizStatuses) { this.userQuizStatuses = userQuizStatuses; }
 }
