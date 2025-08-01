@@ -118,6 +118,7 @@ public class FlashcardService {
             // If API fails, we still save flashcard without phonetic/audio
             e.printStackTrace();
         }
+        flashcard.setId(null);
         Flashcard saved = flashcardRepo.save(flashcard);
 
         User user = userRepo.findById(currentUser.getId())

@@ -87,6 +87,10 @@ public class Flashcard {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Topic getTopic() {
         return topic;
     }
