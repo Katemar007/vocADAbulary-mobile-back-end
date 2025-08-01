@@ -52,6 +52,16 @@
             <artifactId>scala-library</artifactId>
             <version>2.13.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>client</artifactId>
+            <version>0.18.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>0.31.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -60,7 +70,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <!-- REMOTE PLUGIN -->
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
@@ -76,23 +85,6 @@
                     <cleanDisabled>false</cleanDisabled>
                 </configuration>
             </plugin>
-
-            <!-- LOCAL PLUGIN -->
-            <!-- <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>9.22.3</version>
-                <configuration>
-                    <url>jdbc:postgresql://localhost:5432/vocadabulary_db</url>
-                    <user>postgres</user>
-                    <password>postgres</password>
-                    <locations>
-                        <location>classpath:db/migration</location>
-                    </locations>
-                    <baselineOnMigrate>true</baselineOnMigrate>
-                    <cleanDisabled>false</cleanDisabled>
-                </configuration>
-            </plugin> -->
         </plugins>
     </build>
 </project>

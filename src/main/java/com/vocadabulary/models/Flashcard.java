@@ -8,6 +8,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "flashcards")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Flashcard {
 
     @Id
@@ -47,6 +51,19 @@ public class Flashcard {
     private LocalDateTime createdAt;
 
     private Long createdBy;
+
+    // audioBase64 is used to store the audio content in base64 format for easy transfer
+    // This field is not persisted in the database, but used for transferring audio data
+    @Transient
+    private String audioBase64;
+
+    public String getAudioBase64() {
+        return audioBase64;
+    }
+
+    public void setAudioBase64(String audioBase64) {
+        this.audioBase64 = audioBase64;
+    }
 
     // Constructors
     public Flashcard() {}

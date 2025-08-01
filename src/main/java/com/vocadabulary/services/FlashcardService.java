@@ -13,10 +13,13 @@ import com.vocadabulary.repositories.UserRepository;
 import com.vocadabulary.services.UserProgressSummaryService;
 import org.springframework.stereotype.Service;
 import com.vocadabulary.dto.WalletFlashcardDTO;
+import com.vocadabulary.services.PhoneticService;
+import com.vocadabulary.services.TtsService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +33,21 @@ public class FlashcardService {
     private final UserRepository userRepo;
     private final TopicService topicService;
     private final UserProgressSummaryService progressSummaryService;
+    private final PhoneticService phoneticService;
+    private final TtsService ttsService;
 
-    public FlashcardService(FlashcardRepository flashcardRepo, UserFlashcardRepository userFlashcardRepo, UserRepository userRepo, TopicService topicService, UserProgressSummaryService progressSummaryService) {
+    public FlashcardService(FlashcardRepository flashcardRepo, 
+                        UserFlashcardRepository userFlashcardRepo, 
+                        UserRepository userRepo, TopicService topicService, 
+                        UserProgressSummaryService progressSummaryService, 
+                        PhoneticService phoneticService, TtsService ttsService) {
         this.flashcardRepo = flashcardRepo;
         this.userFlashcardRepo = userFlashcardRepo;
         this.userRepo = userRepo;
         this.topicService = topicService;
         this.progressSummaryService = progressSummaryService;
+        this.phoneticService = phoneticService;
+        this.ttsService = ttsService;
     }
     // ✅ Everyone can see all flashcards
     public List<Flashcard> getAllFlashcards() {
@@ -53,9 +64,33 @@ public class FlashcardService {
     }
     // ✅ Get flashcard by ID
     public Flashcard getFlashcardById(Long id) {
-        return flashcardRepo.findById(id)
+        Flashcard flashcard = flashcardRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
-    }
+
+        // Check if phonetic/audio fields are missing
+        if (flashcard.getPhonetic() == null || flashcard.getPhonetic().isBlank()) {
+            try {
+                // Generate phonetic transcription
+                String phonetic = phoneticService.generateIPA(flashcard.getWord());
+                // Save to DB
+                flashcard.setPhonetic(phonetic);
+                flashcardRepo.save(flashcard);
+
+                // Generate audio on the fly
+                byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
+                String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
+                flashcard.setAudioBase64(audioBase64);
+
+            } catch (Exception e) {
+                // Log but still return the flashcard
+                e.printStackTrace();
+            }
+        }
+
+        return flashcard;
+
+        }
+
 
     // ✅ Create flashcard (record creator's ID in `createdBy`)
     public Flashcard createFlashcardInTopic(Long topicId, Flashcard flashcard) {
@@ -70,6 +105,19 @@ public class FlashcardService {
         flashcard.setTopic(topic); // Set the topic for the flashcard
         flashcard.setCreatedBy(currentUser.getId()); // assumes Flashcard has createdBy field
         flashcard.setCreatedAt(LocalDateTime.now()); // Set creation time
+
+        // Generate phonetic and audio right now
+        try {
+            String phonetic = phoneticService.generateIPA(flashcard.getWord()); //TODO: handle empty word and take the word from user input when creating a new FC
+            // 2. Generate audio on the fly (not stored in DB)
+            byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
+            String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
+            flashcard.setAudioBase64(audioBase64);
+            flashcard.setPhonetic(phonetic);
+        } catch (Exception e) {
+            // If API fails, we still save flashcard without phonetic/audio
+            e.printStackTrace();
+        }
         Flashcard saved = flashcardRepo.save(flashcard);
 
         User user = userRepo.findById(currentUser.getId())
