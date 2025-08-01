@@ -88,6 +88,15 @@ public class FlashcardController {
     flashcard.setPhonetic(request.getPhonetic());
     flashcard.setAudioUrl(request.getAudioUrl());
 
+    System.out.println("=== [DEBUG] Enter createFlashcardInTopic ===");
+    System.out.println("Topic ID: " + request.getTopicId());
+    System.out.println("Flashcard.word (input): " + flashcard.getWord());
+    System.out.println("Flashcard.definition (input): " + flashcard.getDefinition());
+    System.out.println("Flashcard.example (input): " + flashcard.getExample());
+
+    System.out.println("FC controllers. Received POST to create flashcard for topic: " + request.getTopicId());
+    System.out.println("FC controllersFlashcard request body: " + flashcard);
+
     return flashcardService.createFlashcardInTopic(request.getTopicId(), flashcard);
     }
 
