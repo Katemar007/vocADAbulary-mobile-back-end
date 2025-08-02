@@ -34,17 +34,12 @@ public class FlashcardController {
         return flashcardService.getAllFlashcards();
     }
 
-    // // ✅ Get all flashcards in user's wallet
-    // @GetMapping("/wallet")
-    // public List<WalletFlashcardDTO> getWalletFlashcards(
-    //     @RequestParam(required = false) String status) { // Optional status filter
-
-    // if (status != null) {
-    //     return flashcardService.getWalletFlashcardsByStatus(status); //http://localhost:8080/api/flashcards/wallet?status=in_progress
-    // } else {
-    //     return flashcardService.getAllWalletFlashcards();
-    // }
-    // }
+    // ✅ Get one flashcard by topic ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Flashcard> getFlashcardById(@PathVariable Long id) {
+        Flashcard flashcard = flashcardService.getFlashcardById(id);
+        return ResponseEntity.ok(flashcard);
+    }
 
     // ✅ Add a flashcard to the user's wallet
     @PostMapping("/{id}/wallet")
