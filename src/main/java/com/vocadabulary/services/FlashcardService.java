@@ -60,6 +60,26 @@ public class FlashcardService {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
 
+        List<Flashcard> flashcards = flashcardRepo.findActiveFlashcardsByTopicId(topicId, currentUser.getId());
+
+            // Generate phonetics/audio for missing entries
+        for (Flashcard flashcard : flashcards) {
+            try {
+                if (flashcard.getPhonetic() == null || flashcard.getPhonetic().isBlank()) {
+                    String phonetic = phoneticService.generateIPA(flashcard.getWord());
+                    flashcard.setPhonetic(phonetic);
+                    flashcardRepo.save(flashcard);
+                }
+
+                // Always generate audio on the fly
+                byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
+                String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
+                flashcard.setAudioBase64(audioBase64);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return flashcardRepo.findActiveFlashcardsByTopicId(topicId, currentUser.getId());
     }
     // ✅ Get flashcard by ID

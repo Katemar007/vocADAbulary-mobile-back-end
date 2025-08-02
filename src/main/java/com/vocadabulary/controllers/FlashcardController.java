@@ -4,12 +4,17 @@ import com.vocadabulary.models.Flashcard;
 import com.vocadabulary.services.FlashcardService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.vocadabulary.services.UserFlashcardService;
 import com.vocadabulary.models.UserFlashcard;
 
 import com.vocadabulary.dto.FlashcardRequest;
 import com.vocadabulary.dto.WalletFlashcardDTO;
+import com.vocadabulary.services.TtsService;
 
 import java.util.List;
 import java.util.Map;
@@ -23,9 +28,14 @@ public class FlashcardController {
 
     private final UserFlashcardService userFlashcardService;
 
-    public FlashcardController(FlashcardService flashcardService, UserFlashcardService userFlashcardService) {
+    private final TtsService ttsService;
+
+    public FlashcardController(FlashcardService flashcardService, 
+                                UserFlashcardService userFlashcardService, 
+                                TtsService ttsService) {
         this.flashcardService = flashcardService;
         this.userFlashcardService = userFlashcardService;
+        this.ttsService = ttsService;
     }
 
     // ✅ Get all flashcards
@@ -48,26 +58,6 @@ public class FlashcardController {
     flashcardService.addToWallet(id);
         return ResponseEntity.ok(Map.of("message", "Flashcard added to wallet."));
 }
-    // // ✅ Update a flashcard's status in the user's wallet
-    // @PutMapping("/{id}/wallet")
-    // public ResponseEntity<?> updateWalletFlashcardStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
-    // String newStatus = request.get("status");
-    // flashcardService.updateFlashcardStatusInWallet(id, newStatus);
-    //     return ResponseEntity.ok(Map.of("message", "Flashcard status updated to: " + newStatus));
-// }
-
-    // // ✅ Remove a flashcard from the user's wallet
-    // @DeleteMapping("/{id}/wallet")
-    // public ResponseEntity<?> removeFromWallet(@PathVariable Long id) {
-    //     flashcardService.removeFromWallet(id);
-    //     return ResponseEntity.ok(Map.of("message", "Flashcard removed from wallet."));
-    // }
-
-    // // ✅ Get all flashcards filtered by status in user's wallet
-    // @GetMapping("/wallet/{status}")
-    // public List<WalletFlashcardDTO> getWalletFlashcardsByStatus(@RequestParam String status) {
-    //     return flashcardService.getWalletFlashcardsByStatus(status);
-    // }
 
     // ✅ Create a new flashcard, topic ID is required
     @PostMapping
@@ -130,14 +120,19 @@ public class FlashcardController {
 
         flashcardService.deleteFlashcard(id);
     }
-    // public ResponseEntity<String> deleteFlashcard(@PathVariable Long id) {
-    //     try {
-    //         flashcardService.deleteFlashcard(id);
-    //         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Flashcard deleted");
-    //     } catch (IllegalStateException e) {
-    //         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized: You can only delete your own flashcards");
-    //     } catch (IllegalArgumentException e) {
-    //         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Flashcard not found");
-    //     }
-    // }
+
+    // Get audio for a flashcard using TTS
+    @GetMapping("/{id}/tts")
+    public ResponseEntity<byte[]> getFlashcardTts(@PathVariable Long id) {
+        Flashcard flashcard = flashcardService.getFlashcardById(id);
+        if (flashcard == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found");
+        }
+
+        byte[] audio = ttsService.generateAudio(flashcard.getWord());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        return new ResponseEntity<>(audio, headers, HttpStatus.OK);
+}
 }
