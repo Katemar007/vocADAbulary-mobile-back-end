@@ -8,8 +8,11 @@ public class QuizDetailDTO {
     private String wrongAnswer1;
     private String wrongAnswer2;
     private String wrongAnswer3;
+    private boolean isHidden;
 
-    public QuizDetailDTO(Long id, Long topicId, String questionText, String correctAnswer, String wrongAnswer1, String wrongAnswer2, String wrongAnswer3) {
+    public QuizDetailDTO(Long id, Long topicId, String questionText, String correctAnswer,
+                         String wrongAnswer1, String wrongAnswer2, String wrongAnswer3,
+                         boolean isHidden) {
         this.id = id;
         this.topicId = topicId;
         this.questionText = questionText;
@@ -17,8 +20,10 @@ public class QuizDetailDTO {
         this.wrongAnswer1 = wrongAnswer1;
         this.wrongAnswer2 = wrongAnswer2;
         this.wrongAnswer3 = wrongAnswer3;
+        this.isHidden = isHidden;
     }
 
+    // Getters
     public Long getId() { return id; }
     public Long getTopicId() { return topicId; }
     public String getQuestionText() { return questionText; }
@@ -26,4 +31,5 @@ public class QuizDetailDTO {
     public String getWrongAnswer1() { return wrongAnswer1; }
     public String getWrongAnswer2() { return wrongAnswer2; }
     public String getWrongAnswer3() { return wrongAnswer3; }
+    public boolean isHidden() { return isHidden; }
 }

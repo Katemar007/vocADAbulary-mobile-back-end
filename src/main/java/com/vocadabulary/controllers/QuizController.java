@@ -1,7 +1,8 @@
 package com.vocadabulary.controllers;
 
-import com.vocadabulary.dto.QuizDTO;
+import com.vocadabulary.dto.QuizDetailDTO;
 import com.vocadabulary.services.QuizService;
+import com.vocadabulary.auth.MockUserContext;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,8 +17,10 @@ public class QuizController {
         this.quizService = quizService;
     }
 
+    // GET /api/quizzes — returns quizzes for the current user, with isHidden
     @GetMapping
-    public List<QuizDTO> getAllQuizzes() {
-        return quizService.getAllQuizzes();
+    public List<QuizDetailDTO> getAllQuizzesForUser() {
+        Long userId = MockUserContext.getCurrentUser().getId();
+        return quizService.getAllQuizzesForUser(userId);
     }
 }

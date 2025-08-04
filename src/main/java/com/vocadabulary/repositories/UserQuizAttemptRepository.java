@@ -13,4 +13,8 @@ public interface UserQuizAttemptRepository extends JpaRepository<UserQuizAttempt
     List<UserQuizAttempt> findByUser(User user);
     List<UserQuizAttempt> findByQuiz(Quiz quiz);
     List<UserQuizAttempt> findByUserAndQuiz(User user, Quiz quiz);
+    UserQuizAttempt findTopByUserAndQuizOrderByTakenAtDesc(User user, Quiz quiz);
+
+    // NEW: supports search by IDs only
+    UserQuizAttempt findTopByUserIdAndQuizIdOrderByTakenAtDesc(Long userId, Long quizId);
 }
