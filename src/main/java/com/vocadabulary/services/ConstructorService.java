@@ -24,6 +24,7 @@ public class ConstructorService {
                 .orElseThrow(() -> new RuntimeException("No sentence found for this topic"));
 
         ConstructorSentenceDTO dto = new ConstructorSentenceDTO();
+        dto.topicId = sentence.getTopic().getId();
         dto.sentenceId = sentence.getId();
         dto.sentenceTemplate = sentence.getSentenceTemplate();
         dto.blanks = sentence.getBlanks().stream()

@@ -23,6 +23,7 @@ public class ConstructorController {
 
     @GetMapping("/{topicId}/random")
     public ConstructorSentenceDTO getRandom(@PathVariable Long topicId) {
+        System.out.println("🔍 Received topicId: " + topicId);  // or use Logger
         return service.getRandomSentence(topicId);
     }
 
