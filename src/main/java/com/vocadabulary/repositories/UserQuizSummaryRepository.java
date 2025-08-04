@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserQuizSummaryRepository extends JpaRepository<UserQuizSummary, Long> {
+    UserQuizSummary findByUserId(Long userId);  // Add this method!
 }
