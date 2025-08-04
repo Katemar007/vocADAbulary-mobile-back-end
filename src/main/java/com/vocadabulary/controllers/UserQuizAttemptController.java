@@ -3,6 +3,8 @@ package com.vocadabulary.controllers;
 import com.vocadabulary.models.UserQuizAttempt;
 import com.vocadabulary.services.UserQuizAttemptService;
 import com.vocadabulary.auth.MockUserContext;
+import com.vocadabulary.dto.UserQuizAttemptDTO; // Import your DTO!
+import com.vocadabulary.requests.QuizAttemptRequest; // Import your request class
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -10,36 +12,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserQuizAttemptController {
 
     private final UserQuizAttemptService userQuizAttemptService;
-    private final MockUserContext mockUserContext;
 
-    public UserQuizAttemptController(UserQuizAttemptService userQuizAttemptService,
-                                     MockUserContext mockUserContext) {
+    public UserQuizAttemptController(UserQuizAttemptService userQuizAttemptService) {
         this.userQuizAttemptService = userQuizAttemptService;
-        this.mockUserContext = mockUserContext;
     }
 
     @PostMapping
-    public UserQuizAttempt createQuizAttempt(@RequestBody QuizAttemptRequest request) {
-        Long userId = MockUserContext.getCurrentUser().getId(); // ✅ Get mock user from header
-        return userQuizAttemptService.createQuizAttempt(userId, request.getQuizId(), request.isPassed());
-    }
-
-    // DTO for request body
-    public static class QuizAttemptRequest {
-        private Long quizId;
-        private boolean isPassed;
-
-        public Long getQuizId() {
-            return quizId;
-        }
-        public void setQuizId(Long quizId) {
-            this.quizId = quizId;
-        }
-        public boolean isPassed() {
-            return isPassed;
-        }
-        public void setPassed(boolean passed) {
-            isPassed = passed;
-        }
+    public UserQuizAttemptDTO createQuizAttempt(@RequestBody QuizAttemptRequest request) {
+        Long userId = MockUserContext.getCurrentUser().getId();
+        UserQuizAttempt attempt = userQuizAttemptService.createQuizAttempt(userId, request.getQuizId(), request.isPassed());
+        return new UserQuizAttemptDTO(attempt);
     }
 }
