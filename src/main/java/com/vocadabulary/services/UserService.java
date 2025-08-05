@@ -4,6 +4,8 @@ import com.vocadabulary.auth.MockUser;
 import com.vocadabulary.auth.MockUserContext;
 import com.vocadabulary.models.User;
 import com.vocadabulary.repositories.UserRepository;
+import com.vocadabulary.requests.UserUpdateRequest;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,19 +65,23 @@ public class UserService {
     // }
 
     // only current mock user has access to update their own record
-    public User updateUser(Long id, User updatedUser) {
-    MockUser mockUser = MockUserContext.getCurrentUser();
+    public User updateUser(Long id, UserUpdateRequest updateRequest) {
+        MockUser mockUser = MockUserContext.getCurrentUser();
 
-    if (mockUser == null || mockUser.getId() != id) {
-        throw new IllegalStateException("Unauthorized: You can only update your own account");
+        if (mockUser == null || mockUser.getId() != id) {
+            throw new IllegalStateException("Unauthorized: You can only update your own account");
+        }
+
+        return userRepo.findById(id).map(user -> {
+            if (updateRequest.getUsername() != null) {
+                user.setUsername(updateRequest.getUsername());
+            }
+            if (updateRequest.getEmail() != null) {
+                user.setEmail(updateRequest.getEmail());
+            }
+            return userRepo.save(user);
+        }).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
-
-    return userRepo.findById(id).map(user -> {
-        user.setUsername(updatedUser.getUsername());
-        user.setEmail(updatedUser.getEmail());
-        return userRepo.save(user);
-    }).orElse(null);
-}
 // Uncomment this method to test the MockUserContext
 //     public void deleteUser(Long id) {
 //         userRepo.deleteById(id);

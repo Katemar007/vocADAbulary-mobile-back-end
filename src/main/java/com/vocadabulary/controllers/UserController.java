@@ -2,9 +2,11 @@ package com.vocadabulary.controllers;
 
 import com.vocadabulary.auth.MockUser;
 import com.vocadabulary.auth.MockUserContext;
+import com.vocadabulary.dto.UserSimpleDTO;
 import com.vocadabulary.models.User;
 import com.vocadabulary.requests.LoginRequest;
 import com.vocadabulary.services.UserService;
+import com.vocadabulary.requests.UserUpdateRequest;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
@@ -89,8 +91,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        User updatedUser = userService.updateUser(id, user);
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest updateRequest) {
+        User updatedUser = userService.updateUser(id, updateRequest);
         if (updatedUser == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(updatedUser);
     }
@@ -99,6 +101,23 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserSimpleDTO> updateUserFields(@PathVariable Long id, @RequestBody UserUpdateRequest updateRequest) {
+        try {
+            User updatedUser = userService.updateUser(id, updateRequest);
+            UserSimpleDTO dto = new UserSimpleDTO(
+                updatedUser.getId(),
+                updatedUser.getUsername(),
+                updatedUser.getEmail()
+            );
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     // 🔧 Optional: use this to check if mock user is set properly
