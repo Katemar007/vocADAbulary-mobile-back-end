@@ -120,6 +120,23 @@ public class UserController {
         }
     }
 
+    // GET /api/users/{id}/simple - for getting info for settings
+    @GetMapping("/{id}/simple")
+    public ResponseEntity<UserSimpleDTO> getSimpleUser(@PathVariable Long id) {
+        Optional<User> userOpt = userService.getUserById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            UserSimpleDTO dto = new UserSimpleDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail()
+            );
+            return ResponseEntity.ok(dto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // 🔧 Optional: use this to check if mock user is set properly
 //    @GetMapping("/test-auth")
 //    public ResponseEntity<String> testAuth() {
