@@ -7,6 +7,7 @@ import com.vocadabulary.models.User;
 import com.vocadabulary.requests.LoginRequest;
 import com.vocadabulary.services.UserService;
 import com.vocadabulary.requests.UserUpdateRequest;
+import com.vocadabulary.requests.UserSignupRequest;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
@@ -135,6 +136,25 @@ public class UserController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signUpUser(@RequestBody UserSignupRequest signupRequest) {
+        // Check for missing fields (basic validation)
+        if (signupRequest.getUsername() == null || signupRequest.getUsername().trim().isEmpty()
+            || signupRequest.getEmail() == null || signupRequest.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Username and email are required.");
+        }
+
+        // You can add further checks for existing username/email if you want!
+        User newUser = new User();
+        newUser.setUsername(signupRequest.getUsername());
+        newUser.setEmail(signupRequest.getEmail());
+
+        User created = userService.createUser(newUser);
+
+        // You can return a DTO with just username/email, or the whole User if you want
+        return ResponseEntity.ok(created);
     }
 
     // 🔧 Optional: use this to check if mock user is set properly
