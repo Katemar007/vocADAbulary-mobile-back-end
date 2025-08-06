@@ -5,21 +5,16 @@ import com.vocadabulary.models.SentenceTemplateBlank;
 import com.vocadabulary.repositories.FlashcardRepository;
 import com.vocadabulary.repositories.SentenceTemplateBlankRepository;
 import com.vocadabulary.repositories.SentenceTemplateRepository;
-import com.vocadabulary.repositories.UserFlashcardRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.vocadabulary.repositories.TopicRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class SentenceGenerationService {
 
     private final FlashcardRepository flashcardRepo;
@@ -32,8 +27,18 @@ public class SentenceGenerationService {
 
     private static final String OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
+    public SentenceGenerationService(FlashcardRepository flashcardRepo,
+                                     TopicRepository topicRepo,
+                                     SentenceTemplateRepository templateRepo,
+                                     SentenceTemplateBlankRepository blankRepo) {
+        this.flashcardRepo = flashcardRepo;
+        this.topicRepo = topicRepo;
+        this.templateRepo = templateRepo;
+        this.blankRepo = blankRepo;
+    }
+
     public void generateAndSaveSentenceForLearnedWord(Long flashcardId) {
-        // 1) Get word & topic
+        // 1) Get word and topic
         String word = flashcardRepo.findWordById(flashcardId);
         Long topicId = topicRepo.findTopicIdForFlashcard(flashcardId);
         String topicName = topicId != null ? topicRepo.findTopicName(topicId) : "general";
@@ -69,7 +74,7 @@ public class SentenceGenerationService {
 
     private String generateSentenceWithBlank(String word, String topic) {
         String prompt = String.format(
-            "Write ONE simple English sentence (A1-A2 level) about the topic \"%s\" that contains the word \"%s\". " +
+            "Write ONE simple English sentence about the topic \"%s\" that contains the word \"%s\". " +
             "Replace that word with exactly three underscores ___ once. " +
             "No quotes, no explanations, only the sentence.",
             topic, word
@@ -78,7 +83,7 @@ public class SentenceGenerationService {
         Map<String, Object> body = Map.of(
             "model", "gpt-4.1",
             "messages", List.of(
-                Map.of("role", "system", "content", "You are a helpful assistant that generates simple sentences for English learners."),
+                Map.of("role", "system", "content", "You are a helpful assistant that generates simple sentences for students studying Software Development being non native english speakers."),
                 Map.of("role", "user", "content", prompt)
             ),
             "max_tokens", 50,
