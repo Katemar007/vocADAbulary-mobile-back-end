@@ -12,6 +12,10 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
     // @Query("SELECT f FROM Flashcard f JOIN UserFlashcard uf ON f.id = uf.id.flashcardId WHERE uf.id.userId = :userId")
     // List<Flashcard> findFlashcardsInUserWallet(@Param("userId") long userId);
 
+    // Find flashcard by ID
+    @Query("select f.word from Flashcard f where f.id = :id")
+        String findWordById(@Param("id") Long id);
+
     // Find flashcards by topic ID that are not learned by the user
     @Query("""
         SELECT f FROM Flashcard f
