@@ -73,4 +73,12 @@ public class UserFlashcardController {
         userFlashcardService.hideFlashcard(userId, flashcardId);
         return Map.of("message", "Flashcard hidden successfully");
     }
+
+    @PostMapping("/{flashcardId}/wallet")
+    public Map<String, String> addToWallet(
+            @PathVariable Long userId,
+            @PathVariable Long flashcardId) {
+        userFlashcardService.addToWallet(userId, flashcardId);
+        return Map.of("message", "Flashcard added to wallet.");
+    }
 }
