@@ -71,10 +71,10 @@ public class FlashcardService {
                     flashcardRepo.save(flashcard);
                 }
 
-                // Always generate audio on the fly
-                byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
-                String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
-                flashcard.setAudioBase64(audioBase64);
+                // // Always generate audio on the fly
+                // byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
+                // String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
+                // flashcard.setAudioBase64(audioBase64);
 
             } catch (Exception e) {
                 e.printStackTrace();

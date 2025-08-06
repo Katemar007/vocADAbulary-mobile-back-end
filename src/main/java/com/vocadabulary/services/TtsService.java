@@ -8,8 +8,18 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
+
 @Service
 public class TtsService {
+
+    // private static final Logger log = LoggerFactory.getLogger(TtsService.class);
+
+    // private String preview(String text) {
+    //     if (text == null) return "";
+    //     return text.length() <= 20 ? text : text.substring(0, 20) + "...";
+    // }
 
     @Value("${OPENAI_API_KEY}")
     private String apiKey;
@@ -17,6 +27,9 @@ public class TtsService {
     private static final String OPENAI_TTS_URL = "https://api.openai.com/v1/audio/speech";
 
     public byte[] generateAudio(String text) {
+        // log.info("🎤 TTS generateAudio called (len={}): preview='{}'",
+        //         text == null ? 0 : text.length(),
+        //         preview(text));
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, Object> body = Map.of(
@@ -34,4 +47,5 @@ public class TtsService {
 
         return restTemplate.postForObject(OPENAI_TTS_URL, request, byte[].class);
     }
+
 }
