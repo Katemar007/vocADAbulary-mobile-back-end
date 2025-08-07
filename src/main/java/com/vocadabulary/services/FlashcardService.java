@@ -12,6 +12,8 @@ import com.vocadabulary.repositories.UserFlashcardRepository;
 import com.vocadabulary.repositories.UserRepository;
 import com.vocadabulary.services.UserProgressSummaryService;
 import org.springframework.stereotype.Service;
+
+import com.vocadabulary.dto.FlashcardDTO;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 import com.vocadabulary.services.PhoneticService;
 import com.vocadabulary.services.TtsService;
@@ -53,8 +55,36 @@ public class FlashcardService {
     public List<Flashcard> getAllFlashcards() {
         return flashcardRepo.findAll();
     }
+    // ✅ Get all flashcards by topic ID with no audio fetched
+    public List<FlashcardDTO> getFlashcardsByTopicId(Long topicId) {
+        List<Flashcard> flashcards = flashcardRepo.findByTopicId(topicId);
+        // Generate phonetics for missing entries
+        for (Flashcard flashcard : flashcards) {
+            try {
+                if (flashcard.getPhonetic() == null || flashcard.getPhonetic().isBlank()) {
+                    String phonetic = phoneticService.generateIPA(flashcard.getWord());
+                    flashcard.setPhonetic(phonetic);
+                    flashcardRepo.save(flashcard);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return flashcards.stream()
+            .map(f -> new FlashcardDTO(
+                f.getId(),
+                f.getWord(),
+                f.getDefinition(),
+                f.getExample(),
+                f.getSynonyms(),
+                f.getPhonetic(),
+                f.getCreatedAt()
+            ))
+            .toList();
+    }
+
     // get active flashcards by topic ID that are not learned by the user
-    public List<Flashcard> getFlashcardsByTopicId(Long topicId) {
+    public List<Flashcard> getFlashcardsInProgressByTopicId(Long topicId) {
         MockUser currentUser = MockUserContext.getCurrentUser();
         if (currentUser == null) {
             throw new IllegalStateException("Unauthorized: No mock user");

@@ -23,6 +23,9 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
     """)
     List<Flashcard> findActiveFlashcardsByTopicId(@Param("topicId") Long topicId,
                                                 @Param("userId") Long userId);
+    
+    // Find all flashcards by topic ID
+    List<Flashcard> findByTopicId(Long topicId);                                            
 
     @Query("SELECT COUNT(f) FROM Flashcard f")
         long countAllFlashcards();

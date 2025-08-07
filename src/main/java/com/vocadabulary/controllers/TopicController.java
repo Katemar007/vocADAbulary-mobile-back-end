@@ -1,5 +1,6 @@
 package com.vocadabulary.controllers;
 
+import com.vocadabulary.dto.FlashcardDTO;
 import com.vocadabulary.models.Flashcard;
 import com.vocadabulary.models.Topic;
 import com.vocadabulary.services.FlashcardService;
@@ -32,7 +33,7 @@ public class TopicController {
     }
     // get flashcards by topic id
     @GetMapping("/{id}/flashcards")
-    public List<Flashcard> getFlashcardsByTopicId(@PathVariable("id") Long topicId) {
+    public List<FlashcardDTO> getFlashcardsForTopic(@PathVariable("id") Long topicId) {
         return flashcardService.getFlashcardsByTopicId(topicId);
     }
     // create a flashcard in a topic
