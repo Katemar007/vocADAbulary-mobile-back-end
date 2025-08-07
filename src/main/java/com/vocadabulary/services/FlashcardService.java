@@ -78,7 +78,8 @@ public class FlashcardService {
                 f.getExample(),
                 f.getSynonyms(),
                 f.getPhonetic(),
-                f.getCreatedAt()
+                f.getCreatedAt(),
+                f.getCreatedBy()
             ))
             .toList();
     }
@@ -289,5 +290,21 @@ public class FlashcardService {
         if (currentUser != null) {
             progressSummaryService.refreshLastActive(currentUser.getId());
         }
+    }
+
+        public List<FlashcardDTO> getAllFlashcardDTOs() {
+        List<Flashcard> flashcards = flashcardRepo.findAll();
+        return flashcards.stream()
+            .map(f -> new FlashcardDTO(
+                f.getId(),
+                f.getWord(),
+                f.getDefinition(),
+                f.getExample(),
+                f.getSynonyms(),
+                f.getPhonetic(),
+                f.getCreatedAt(),
+                f.getCreatedBy()     // This is the key line!
+            ))
+            .toList();
     }
 }
