@@ -2,29 +2,23 @@ package com.vocadabulary.services;
 
 import com.vocadabulary.auth.MockUser;
 import com.vocadabulary.auth.MockUserContext;
+import com.vocadabulary.dto.FlashcardDTO;
 import com.vocadabulary.models.Flashcard;
-import com.vocadabulary.models.User;
 import com.vocadabulary.models.Topic;
+import com.vocadabulary.models.User;
 import com.vocadabulary.models.UserFlashcard;
 import com.vocadabulary.models.UserFlashcardId;
 import com.vocadabulary.repositories.FlashcardRepository;
 import com.vocadabulary.repositories.UserFlashcardRepository;
 import com.vocadabulary.repositories.UserRepository;
-import com.vocadabulary.services.UserProgressSummaryService;
-import org.springframework.stereotype.Service;
-
-import com.vocadabulary.dto.FlashcardDTO;
-import com.vocadabulary.dto.WalletFlashcardDTO;
-import com.vocadabulary.services.PhoneticService;
-import com.vocadabulary.services.TtsService;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Base64;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FlashcardService {
@@ -38,11 +32,13 @@ public class FlashcardService {
     private final PhoneticService phoneticService;
     private final TtsService ttsService;
 
-    public FlashcardService(FlashcardRepository flashcardRepo, 
-                        UserFlashcardRepository userFlashcardRepo, 
-                        UserRepository userRepo, TopicService topicService, 
-                        UserProgressSummaryService progressSummaryService, 
-                        PhoneticService phoneticService, TtsService ttsService) {
+    public FlashcardService(FlashcardRepository flashcardRepo,
+                            UserFlashcardRepository userFlashcardRepo,
+                            UserRepository userRepo,
+                            TopicService topicService,
+                            UserProgressSummaryService progressSummaryService,
+                            PhoneticService phoneticService,
+                            TtsService ttsService) {
         this.flashcardRepo = flashcardRepo;
         this.userFlashcardRepo = userFlashcardRepo;
         this.userRepo = userRepo;
@@ -51,13 +47,16 @@ public class FlashcardService {
         this.phoneticService = phoneticService;
         this.ttsService = ttsService;
     }
-    // ✅ Everyone can see all flashcards
+
+    // ✅ Everyone can see all raw flashcards (entity)
     public List<Flashcard> getAllFlashcards() {
         return flashcardRepo.findAll();
     }
-    // ✅ Get all flashcards by topic ID with no audio fetched
+
+    // ✅ Get all flashcards by topic ID (DTO, no audio fetched)
     public List<FlashcardDTO> getFlashcardsByTopicId(Long topicId) {
         List<Flashcard> flashcards = flashcardRepo.findByTopicId(topicId);
+
         // Generate phonetics for missing entries
         for (Flashcard flashcard : flashcards) {
             try {
@@ -67,24 +66,27 @@ public class FlashcardService {
                     flashcardRepo.save(flashcard);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.warn("Failed to generate phonetic for word '{}': {}", flashcard.getWord(), e.getMessage());
             }
         }
+
         return flashcards.stream()
-            .map(f -> new FlashcardDTO(
-                f.getId(),
-                f.getWord(),
-                f.getDefinition(),
-                f.getExample(),
-                f.getSynonyms(),
-                f.getPhonetic(),
-                f.getCreatedAt(),
-                f.getCreatedBy()
-            ))
-            .toList();
+                .map(f -> new FlashcardDTO(
+                        f.getId(),
+                        f.getWord(),
+                        f.getDefinition(),
+                        f.getExample(),
+                        f.getSynonyms(),
+                        f.getPhonetic(),
+                        f.getCreatedAt(),
+                        f.getCreatedBy(),
+                        f.getTopic() != null ? f.getTopic().getId() : null,      // ✅ topicId
+                        f.getTopic() != null ? f.getTopic().getName() : null     // ✅ topicName
+                ))
+                .toList();
     }
 
-    // get active flashcards by topic ID that are not learned by the user
+    // ✅ Get active flashcards by topic ID that are not learned by the user (raw entities)
     public List<Flashcard> getFlashcardsInProgressByTopicId(Long topicId) {
         MockUser currentUser = MockUserContext.getCurrentUser();
         if (currentUser == null) {
@@ -93,7 +95,7 @@ public class FlashcardService {
 
         List<Flashcard> flashcards = flashcardRepo.findActiveFlashcardsByTopicId(topicId, currentUser.getId());
 
-            // Generate phonetics/audio for missing entries
+        // Generate phonetics for missing entries
         for (Flashcard flashcard : flashcards) {
             try {
                 if (flashcard.getPhonetic() == null || flashcard.getPhonetic().isBlank()) {
@@ -101,138 +103,120 @@ public class FlashcardService {
                     flashcard.setPhonetic(phonetic);
                     flashcardRepo.save(flashcard);
                 }
-
-                // // Always generate audio on the fly
-                // byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
-                // String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
-                // flashcard.setAudioBase64(audioBase64);
-
             } catch (Exception e) {
-                e.printStackTrace();
+                log.warn("Failed to generate phonetic for word '{}': {}", flashcard.getWord(), e.getMessage());
             }
         }
+
+        // Return fresh query result (keeps method behavior as you originally had it)
         return flashcardRepo.findActiveFlashcardsByTopicId(topicId, currentUser.getId());
     }
-    // ✅ Get flashcard by ID
+
+    // ✅ Get flashcard by ID (entity); generate & attach audio base64 in-memory
     public Flashcard getFlashcardById(Long id) {
         Flashcard flashcard = flashcardRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
 
-        // Check if phonetic/audio fields are missing
+        // Generate phonetic + audio if missing
         if (flashcard.getPhonetic() == null || flashcard.getPhonetic().isBlank()) {
             try {
-                // Generate phonetic transcription
                 String phonetic = phoneticService.generateIPA(flashcard.getWord());
-                // Save to DB
                 flashcard.setPhonetic(phonetic);
                 flashcardRepo.save(flashcard);
 
-                // Generate audio on the fly
                 byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
                 String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
                 flashcard.setAudioBase64(audioBase64);
-
             } catch (Exception e) {
-                // Log but still return the flashcard
-                e.printStackTrace();
+                log.warn("Failed to enrich flashcard {} with phonetic/audio: {}", id, e.getMessage());
             }
         }
 
         return flashcard;
+    }
 
-        }
-
-
-    // ✅ Create flashcard (record creator's ID in `createdBy`)
+    // ✅ Create flashcard within a topic (records createdBy & creates UserFlashcard link)
     public Flashcard createFlashcardInTopic(Long topicId, Flashcard flashcard) {
         Topic topic = topicService.getTopicById(topicId);
 
         MockUser currentUser = MockUserContext.getCurrentUser();
-
         if (currentUser == null) {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
 
-        flashcard.setTopic(topic); // Set the topic for the flashcard
-        flashcard.setCreatedBy(currentUser.getId()); // assumes Flashcard has createdBy field
-        flashcard.setCreatedAt(LocalDateTime.now()); // Set creation time
+        flashcard.setTopic(topic);
+        flashcard.setCreatedBy(currentUser.getId());
+        flashcard.setCreatedAt(LocalDateTime.now());
 
-        // Generate phonetic and audio right now
+        // Try to enrich with phonetic + audio (best-effort)
         try {
-            String phonetic = phoneticService.generateIPA(flashcard.getWord()); //TODO: handle empty word and take the word from user input when creating a new FC
-            // 2. Generate audio on the fly (not stored in DB)
+            String phonetic = phoneticService.generateIPA(flashcard.getWord());
             byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
             String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
-            flashcard.setAudioBase64(audioBase64);
+
             flashcard.setPhonetic(phonetic);
+            flashcard.setAudioBase64(audioBase64);
         } catch (Exception e) {
-            // If API fails, we still save flashcard without phonetic/audio
-            e.printStackTrace();
+            log.warn("Failed to enrich newly created flashcard '{}': {}", flashcard.getWord(), e.getMessage());
         }
-        flashcard.setId(null);
+
+        flashcard.setId(null); // ensure insert
         Flashcard saved = flashcardRepo.save(flashcard);
 
         User user = userRepo.findById(currentUser.getId())
-        .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + currentUser.getId()));
-        // Create UserFlashcard to track this flashcard for the user
+                .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + currentUser.getId()));
+
         UserFlashcard userFlashcard = new UserFlashcard();
         userFlashcard.setId(new UserFlashcardId(user.getId(), saved.getId()));
         userFlashcard.setUser(user);
         userFlashcard.setFlashcard(saved);
-        userFlashcard.setStatus("IN_PROGRESS");  // Default status
-        userFlashcard.setInWallet(true);         // Optional: add to wallet automatically
+        userFlashcard.setStatus("IN_PROGRESS");
+        userFlashcard.setInWallet(true);
         userFlashcard.setLastReviewed(LocalDateTime.now());
 
         userFlashcardRepo.save(userFlashcard);
 
         return saved;
-}
-    // ✅ Delete flashcard (Admins can delete anything; users can delete their own)
+    }
+
+    // ✅ Delete flashcard (admins or creator only)
     public void deleteFlashcard(Long id) {
         MockUser currentUser = MockUserContext.getCurrentUser();
-
         if (currentUser == null) {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
 
         Optional<Flashcard> optionalCard = flashcardRepo.findById(id);
-
         if (optionalCard.isEmpty()) {
             throw new IllegalArgumentException("Flashcard not found");
         }
 
         Flashcard card = optionalCard.get();
-
         if ("admin".equalsIgnoreCase(currentUser.getRole()) || currentUser.getId() == card.getCreatedBy()) {
             flashcardRepo.deleteById(id);
         } else {
             throw new IllegalStateException("Unauthorized: You can only delete your own flashcards");
         }
     }
-    // ✅ Add a flashcard to user's wallet (mock user version)
+
+    // ✅ Add a flashcard to the user's wallet (mock user version)
     public void addToWallet(Long flashcardId) {
         MockUser currentUser = MockUserContext.getCurrentUser();
-
         if (currentUser == null) {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
 
-        // Get User
         User user = userRepo.findById(currentUser.getId())
-            .orElseThrow(() -> new IllegalArgumentException(
-                "User not found for ID: " + currentUser.getId()));
+                .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + currentUser.getId()));
 
-        // Get Flashcard
         Flashcard flashcard = flashcardRepo.findById(flashcardId)
-            .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
 
-        // Check if a UserFlashcard already exists for this user/flashcard
         Optional<UserFlashcard> existing = userFlashcardRepo.findById(
-            new UserFlashcardId(currentUser.getId(), flashcardId));
+                new UserFlashcardId(currentUser.getId(), flashcardId));
 
         UserFlashcard userFlashcard;
         if (existing.isPresent()) {
-            // If it exists, just mark it as inWallet again
             userFlashcard = existing.get();
             if (Boolean.TRUE.equals(userFlashcard.getInWallet())) {
                 throw new IllegalStateException("Flashcard is already in your wallet");
@@ -240,7 +224,6 @@ public class FlashcardService {
             userFlashcard.setInWallet(true);
             userFlashcard.setStatus("IN_PROGRESS");
         } else {
-            // Otherwise, create a new record
             userFlashcard = new UserFlashcard();
             userFlashcard.setId(new UserFlashcardId(currentUser.getId(), flashcardId));
             userFlashcard.setStatus("IN_PROGRESS");
@@ -249,17 +232,14 @@ public class FlashcardService {
             userFlashcard.setInWallet(true);
         }
 
-        // Always update last reviewed time
         userFlashcard.setLastReviewed(LocalDateTime.now());
-
         userFlashcardRepo.save(userFlashcard);
         progressSummaryService.refreshLastActive(currentUser.getId());
     }
 
-        // ✅ Update a flashcard (if user is creator or admin)
+    // ✅ Update a flashcard (admins or creator only)
     public Flashcard updateFlashcard(Long id, Flashcard updatedFlashcard) {
         MockUser currentUser = MockUserContext.getCurrentUser();
-
         if (currentUser == null) {
             throw new IllegalStateException("Unauthorized: No mock user");
         }
@@ -267,13 +247,11 @@ public class FlashcardService {
         Flashcard flashcard = flashcardRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
 
-        // ⚠️ Ownership check
-        if (!currentUser.getRole().equalsIgnoreCase("admin") &&
-            currentUser.getId() != flashcard.getCreatedBy()) {
+        if (!currentUser.getRole().equalsIgnoreCase("admin")
+                && currentUser.getId() != flashcard.getCreatedBy()) {
             throw new IllegalStateException("You can only update your own flashcards");
         }
 
-        // Update fields
         flashcard.setWord(updatedFlashcard.getWord());
         flashcard.setDefinition(updatedFlashcard.getDefinition());
         flashcard.setExample(updatedFlashcard.getExample());
@@ -284,7 +262,7 @@ public class FlashcardService {
         return flashcardRepo.save(flashcard);
     }
 
-    // Record the view for progress summary OPTIONAL for the future
+    // Optional: record a view to bump last-active
     public void recordFlashcardView(Long flashcardId) {
         MockUser currentUser = MockUserContext.getCurrentUser();
         if (currentUser != null) {
@@ -292,19 +270,22 @@ public class FlashcardService {
         }
     }
 
-        public List<FlashcardDTO> getAllFlashcardDTOs() {
+    // ✅ Return all flashcards as DTOs (includes topicId/topicName)
+    public List<FlashcardDTO> getAllFlashcardDTOs() {
         List<Flashcard> flashcards = flashcardRepo.findAll();
         return flashcards.stream()
-            .map(f -> new FlashcardDTO(
-                f.getId(),
-                f.getWord(),
-                f.getDefinition(),
-                f.getExample(),
-                f.getSynonyms(),
-                f.getPhonetic(),
-                f.getCreatedAt(),
-                f.getCreatedBy()     // This is the key line!
-            ))
-            .toList();
+                .map(f -> new FlashcardDTO(
+                        f.getId(),
+                        f.getWord(),
+                        f.getDefinition(),
+                        f.getExample(),
+                        f.getSynonyms(),
+                        f.getPhonetic(),
+                        f.getCreatedAt(),
+                        f.getCreatedBy(),
+                        f.getTopic() != null ? f.getTopic().getId() : null,      // ✅ topicId
+                        f.getTopic() != null ? f.getTopic().getName() : null     // ✅ topicName
+                ))
+                .toList();
     }
 }

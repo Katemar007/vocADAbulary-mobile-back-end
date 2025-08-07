@@ -11,8 +11,21 @@ public class FlashcardDTO {
     private String phonetic;
     private LocalDateTime createdAt;
     private Long createdBy;
+    private Long topicId;     // ✅ new
+    private String topicName; // ✅ new
 
-    public FlashcardDTO(Long id, String word, String definition, String example, String synonyms, String phonetic, LocalDateTime createdAt, Long createdBy) {
+    public FlashcardDTO(
+        Long id,
+        String word,
+        String definition,
+        String example,
+        String synonyms,
+        String phonetic,
+        LocalDateTime createdAt,
+        Long createdBy,
+        Long topicId,
+        String topicName
+    ) {
         this.id = id;
         this.word = word;
         this.definition = definition;
@@ -21,9 +34,11 @@ public class FlashcardDTO {
         this.phonetic = phonetic;
         this.createdAt = createdAt;
         this.createdBy = createdBy;
+        this.topicId = topicId;
+        this.topicName = topicName;
     }
 
-    // Getters
+    // Getters (Jackson needs these to serialize)
     public Long getId() { return id; }
     public String getWord() { return word; }
     public String getDefinition() { return definition; }
@@ -32,4 +47,6 @@ public class FlashcardDTO {
     public String getPhonetic() { return phonetic; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public Long getCreatedBy() { return createdBy; }
+    public Long getTopicId() { return topicId; }        // ✅ expose
+    public String getTopicName() { return topicName; }  // ✅ expose
 }
