@@ -10,8 +10,9 @@ public class FlashcardDTO {
     private String synonyms;
     private String phonetic;
     private LocalDateTime createdAt;
+    private Long createdBy;
 
-    public FlashcardDTO(Long id, String word, String definition, String example, String synonyms, String phonetic, LocalDateTime createdAt) {
+    public FlashcardDTO(Long id, String word, String definition, String example, String synonyms, String phonetic, LocalDateTime createdAt, Long createdBy) {
         this.id = id;
         this.word = word;
         this.definition = definition;
@@ -19,6 +20,7 @@ public class FlashcardDTO {
         this.synonyms = synonyms;
         this.phonetic = phonetic;
         this.createdAt = createdAt;
+        this.createdBy = createdBy;
     }
 
     // Getters
@@ -29,4 +31,5 @@ public class FlashcardDTO {
     public String getSynonyms() { return synonyms; }
     public String getPhonetic() { return phonetic; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public Long getCreatedBy() { return createdBy; }
 }
