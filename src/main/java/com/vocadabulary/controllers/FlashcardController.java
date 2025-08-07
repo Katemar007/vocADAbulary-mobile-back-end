@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.vocadabulary.services.UserFlashcardService;
 import com.vocadabulary.models.UserFlashcard;
-
+import com.vocadabulary.dto.FlashcardDTO;
 import com.vocadabulary.dto.FlashcardRequest;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 import com.vocadabulary.services.TtsService;
@@ -40,8 +40,20 @@ public class FlashcardController {
 
     // ✅ Get all flashcards
     @GetMapping
-    public List<Flashcard> getAllFlashcards() {
-        return flashcardService.getAllFlashcards();
+    public List<FlashcardDTO> getAllFlashcardDTOs() {
+        List<Flashcard> flashcards = flashcardRepository.findAll();
+        return flashcards.stream()
+            .map(f -> new FlashcardDTO(
+                f.getId(),
+                f.getWord(),
+                f.getDefinition(),
+                f.getExample(),
+                f.getSynonyms(),
+                f.getPhonetic(),
+                f.getCreatedAt(),
+                f.getCreatedBy()
+            ))
+            .toList();
     }
 
     // ✅ Get one flashcard by topic ID
