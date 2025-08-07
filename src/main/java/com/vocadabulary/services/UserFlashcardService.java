@@ -10,6 +10,7 @@ import com.vocadabulary.repositories.FlashcardRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vocadabulary.dto.WalletFlashcardDTO;
+import com.vocadabulary.dto.FlashcardDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -188,5 +189,22 @@ public class UserFlashcardService {
         userFlashcard.setInWallet(true);
         userFlashcardRepo.save(userFlashcard);
         System.out.println("   --> userFlashcard updated and saved.");
+    }
+
+
+    public List<FlashcardDTO> getAllFlashcardDTOs() {
+        List<Flashcard> flashcards = flashcardRepo.findAll();
+        return flashcards.stream()
+            .map(f -> new FlashcardDTO(
+                f.getId(),
+                f.getWord(),
+                f.getDefinition(),
+                f.getExample(),
+                f.getSynonyms(),
+                f.getPhonetic(),
+                f.getCreatedAt(),
+                f.getCreatedBy()     // This is the key line!
+            ))
+            .toList();
     }
 }

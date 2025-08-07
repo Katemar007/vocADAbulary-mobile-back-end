@@ -15,6 +15,7 @@ import com.vocadabulary.dto.FlashcardDTO;
 import com.vocadabulary.dto.FlashcardRequest;
 import com.vocadabulary.dto.WalletFlashcardDTO;
 import com.vocadabulary.services.TtsService;
+import com.vocadabulary.dto.FlashcardDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -38,22 +39,10 @@ public class FlashcardController {
         this.ttsService = ttsService;
     }
 
-    // ✅ Get all flashcards
+    // ✅ Get all flashcards as DTO
     @GetMapping
     public List<FlashcardDTO> getAllFlashcardDTOs() {
-        List<Flashcard> flashcards = flashcardRepository.findAll();
-        return flashcards.stream()
-            .map(f -> new FlashcardDTO(
-                f.getId(),
-                f.getWord(),
-                f.getDefinition(),
-                f.getExample(),
-                f.getSynonyms(),
-                f.getPhonetic(),
-                f.getCreatedAt(),
-                f.getCreatedBy()
-            ))
-            .toList();
+        return flashcardService.getAllFlashcardDTOs();
     }
 
     // ✅ Get one flashcard by topic ID
