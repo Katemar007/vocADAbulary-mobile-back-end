@@ -288,4 +288,9 @@ public class FlashcardService {
                 ))
                 .toList();
     }
+
+    // ✅ NEW: Count how many flashcards a given user has created (for Progress "Created")
+    public long countCreatedByUser(Long userId) {
+        return flashcardRepo.countByCreatedBy(userId);
+    }
 }

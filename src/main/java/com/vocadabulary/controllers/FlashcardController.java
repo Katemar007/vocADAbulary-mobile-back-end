@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.vocadabulary.services.UserFlashcardService;
 import com.vocadabulary.models.UserFlashcard;
+import com.vocadabulary.auth.MockUser;
+import com.vocadabulary.auth.MockUserContext;
 import com.vocadabulary.dto.FlashcardDTO;
 import com.vocadabulary.dto.FlashcardRequest;
 import com.vocadabulary.dto.WalletFlashcardDTO;
@@ -122,5 +124,16 @@ public class FlashcardController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         return new ResponseEntity<>(audio, headers, HttpStatus.OK);
+    }
+
+    // ✅ How many flashcards were created by the current (mock) user
+    @GetMapping("/stats/created")
+    public Map<String, Long> getCreatedCountForCurrentUser() {
+        MockUser current = MockUserContext.getCurrentUser();
+        if (current == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No mock user");
+        }
+        long n = flashcardService.countCreatedByUser(current.getId());
+        return Map.of("createdCount", n);
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-
 public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
     // @Query("SELECT f FROM Flashcard f JOIN UserFlashcard uf ON f.id = uf.id.flashcardId WHERE uf.id.userId = :userId")
     // List<Flashcard> findFlashcardsInUserWallet(@Param("userId") long userId);
@@ -28,6 +27,8 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
     List<Flashcard> findByTopicId(Long topicId);                                            
 
     @Query("SELECT COUNT(f) FROM Flashcard f")
-        long countAllFlashcards();
+    long countAllFlashcards();
 
+    // ✅ Count flashcards created by a specific user (for "Created" stats in Progress screen)
+    long countByCreatedBy(Long createdBy);
 }
