@@ -1,9 +1,30 @@
 // SentenceDTOs.java
 package com.vocadabulary.dto;
 
+import java.time.Instant;
 import java.util.List;
 
 public class SentenceDTOs {
+  public static class SentenceTemplateResponse {
+        public Long id;
+        public String templateText;
+        public String source;
+        public String contextTopic;
+        public Instant createdAt;
+        public Long flashcardId;
+        public Integer blankIndex;
+
+    public SentenceTemplateResponse(Long id, String templateText, String source, String contextTopic,
+                              Instant createdAt, Long flashcardId, Integer blankIndex) {
+      this.id = id;
+      this.templateText = templateText;
+      this.source = source;
+      this.contextTopic = contextTopic;
+      this.createdAt = createdAt;
+      this.flashcardId = flashcardId;
+      this.blankIndex = blankIndex;
+      }
+    }
   // Prepare
   public static class PrepareSentenceResponse {
     public Long templateId;

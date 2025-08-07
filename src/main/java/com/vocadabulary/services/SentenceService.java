@@ -1,13 +1,21 @@
 package com.vocadabulary.services;
 
+import com.vocadabulary.auth.MockUser;
+import com.vocadabulary.auth.MockUserContext;
 import com.vocadabulary.dto.SentenceDTOs.*;
+import com.vocadabulary.dto.TemplateDTOs;
+import com.vocadabulary.dto.TemplateDTOs.TemplateResponseWithBlank;
 import com.vocadabulary.models.*;
 import com.vocadabulary.repositories.*;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +27,8 @@ public class SentenceService {
     private final UserSentenceAttemptRepository attemptRepo;
     private final UserSentenceAttemptFillRepository fillRepo;
     private final UserSentenceBlankStatsRepository statsRepo;
+    private final SentenceTemplateRepository sentenceTemplateRepo;
+    private final SentenceTemplateBlankRepository sentenceTemplateBlankRepo;
 
     public SentenceService(
         SentenceTemplateRepository templateRepo,
@@ -33,9 +43,19 @@ public class SentenceService {
             this.attemptRepo = attemptRepo;
             this.fillRepo = fillRepo;
             this.statsRepo = statsRepo;
+            this.sentenceTemplateRepo = templateRepo;
+            this.sentenceTemplateBlankRepo = blankRepo;
+        }
+    
+        private long currentUserId() {
+            MockUser mockUser = MockUserContext.getCurrentUser();
+            if (mockUser == null) {
+                throw new IllegalStateException("No mock user found in context");
+            }
+            return mockUser.getId();
         }
 
-  public PrepareSentenceResponse prepareSentence(Long templateId, Long userId) {
+  public PrepareSentenceResponse prepareSentence(Long templateId) {
     SentenceTemplate t = templateRepo.findById(templateId)
         .orElseThrow(() -> new IllegalArgumentException("Template not found: " + templateId));
 
@@ -50,7 +70,7 @@ public class SentenceService {
       if (!parts[i].isEmpty()) chunks.add(new Chunk("text", parts[i], null, null, null));
       if (i < parts.length-1) {
         int idx = i;
-        UserSentenceBlankStats.Key key = new UserSentenceBlankStats.Key(userId, templateId, idx);
+        UserSentenceBlankStats.Key key = new UserSentenceBlankStats.Key(currentUserId(), templateId, idx);
         Optional<UserSentenceBlankStats> stat = statsRepo.findById(key);
         boolean reveal = stat.map(s -> s.getFailStreak() >= 3).orElse(false);
 
@@ -67,14 +87,14 @@ public class SentenceService {
   }
 
   @Transactional
-  public FinalizeSentenceResponse finalizeSentence(FinalizeSentenceRequest req, Long userId) {
+  public FinalizeSentenceResponse finalizeSentence(FinalizeSentenceRequest req) {
     Objects.requireNonNull(req.templateId); Objects.requireNonNull(req.answers);
 
     SentenceTemplate t = templateRepo.findById(req.templateId)
         .orElseThrow(() -> new IllegalArgumentException("Template not found"));
 
     // Build learned lookup (normalized word -> flashcardId)
-    List<UserFlashcard> learnedUF = userFlashcardRepo.findLearnedFlashcards(userId);
+    List<UserFlashcard> learnedUF = userFlashcardRepo.findLearnedFlashcards(currentUserId());
     Map<String, Long> learnedByWord = new HashMap<>();
     for (UserFlashcard uf : learnedUF) {
         String w = normalize(uf.getFlashcard().getWord());
@@ -103,7 +123,7 @@ public class SentenceService {
 
     // persist attempt shell
     UserSentenceAttempt attempt = new UserSentenceAttempt();
-    attempt.setUserId(userId); attempt.setTemplateId(req.templateId);
+    attempt.setUserId(currentUserId()); attempt.setTemplateId(req.templateId);
 
     // Build final text with original casing as typed (we can keep normalized for checks but store original)
     // We only stored normalized in 'typed'; to keep original, also build a second map if you want.
@@ -133,12 +153,10 @@ public class SentenceService {
         }
 
         // stats update
-        UserSentenceBlankStats.Key key = new UserSentenceBlankStats.Key(userId, req.templateId, idx);
-        UserSentenceBlankStats stats = statsRepo.findById(key).orElseGet(() -> {
-            UserSentenceBlankStats s = new UserSentenceBlankStats();
-            s.setUserId(userId); s.setTemplateId(req.templateId); s.setBlankIndex(idx);
-            return s;
-        });
+        UserSentenceBlankStats.Key key = new UserSentenceBlankStats.Key(currentUserId(), req.templateId, idx);
+        UserSentenceBlankStats stats = statsRepo.findById(key)
+            .orElseGet(() -> new UserSentenceBlankStats(currentUserId(), req.templateId, idx));
+
         if (isCorrect) {
             stats.setTotalCorrect(stats.getTotalCorrect()+1);
             stats.setFailStreak(0);
@@ -192,4 +210,44 @@ public class SentenceService {
 
     // local cache for fills per request
     private final List<UserSentenceAttemptFill> tempFills = new ArrayList<>();
+
+    // Get a random template for a user
+    public TemplateResponseWithBlank getRandomTemplateForUser(Long currentUserId) {
+        // 1. Get all learned & visible flashcards
+        List<UserFlashcard> learnedFlashcards = userFlashcardRepo.findLearnedAndVisibleFlashcards(currentUserId());
+
+        if (learnedFlashcards.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has no learned flashcards. Learn some first.");
+        }
+        // 2. Get all flashcard IDs
+        List<Long> flashcardIds = learnedFlashcards.stream()
+            .map(uf -> uf.getFlashcard().getId())
+            .toList();
+
+        // 3. Find matching templates
+        List<SentenceTemplate> candidates = sentenceTemplateRepo.findTemplatesWithFlashcardIds(flashcardIds);
+
+        if (candidates.isEmpty()) {
+            throw new IllegalStateException("No templates found for user's learned flashcards.");
+        }
+
+        // 4. Pick one at random
+        SentenceTemplate chosen = candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
+
+        // 5. Also get the blank to know which flashcard it links to
+        SentenceTemplateBlank blank = sentenceTemplateBlankRepo.findByTemplateId(chosen.getId());
+        if (blank == null) {
+            throw new IllegalStateException("No blanks found for the selected template.");
+        }
+
+        return new TemplateDTOs.TemplateResponseWithBlank(
+            chosen.getId(),
+            chosen.getTemplateText(),
+            chosen.getSource(),
+            chosen.getContextTopic(),
+            chosen.getCreatedAt(),
+            blank.getTargetFlashcardId(),
+            blank.getBlankIndex()
+        );
+    }
 }

@@ -27,4 +27,23 @@ public class TemplateDTOs {
             this.createdAt = createdAt;
         }
     }
+
+    public static class TemplateResponseWithBlank extends TemplateResponse {
+    public Long flashcardId;
+    public int blankIndex;
+
+    public TemplateResponseWithBlank(
+        Long id,
+        String templateText,
+        String source,
+        String contextTopic,
+        Instant createdAt,
+        Long flashcardId,
+        int blankIndex
+    ) {
+        super(id, templateText, source, contextTopic, createdAt);
+        this.flashcardId = flashcardId;
+        this.blankIndex = blankIndex;
+    }
+}
 }

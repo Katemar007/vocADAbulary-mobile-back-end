@@ -6,4 +6,7 @@ import java.util.List;
 
 public interface SentenceTemplateBlankRepository extends JpaRepository<SentenceTemplateBlank, Long> {
     List<SentenceTemplateBlank> findByTemplateIdOrderByBlankIndexAsc(Long templateId);
+
+    SentenceTemplateBlank findByTemplateId(Long templateId);
+
 }

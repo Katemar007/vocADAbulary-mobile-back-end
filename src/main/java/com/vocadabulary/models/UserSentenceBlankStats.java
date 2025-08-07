@@ -18,14 +18,37 @@ public class UserSentenceBlankStats {
     private int failStreak;
     private Instant lastAttemptAt;
 
+        // ✅ Constructor initializes all ID fields safely
+    public UserSentenceBlankStats(Long userId, Long templateId, Integer blankIndex) {
+        this.userId = userId;
+        this.templateId = templateId;
+        this.blankIndex = blankIndex;
+        this.totalCorrect = 0;
+        this.totalIncorrect = 0;
+        this.failStreak = 0;
+    }
+
+    // ✅ Required no-arg constructor for JPA
+    public UserSentenceBlankStats() {}
+
     public static class Key implements Serializable {
-        private Long userId; private Long templateId; private Integer blankIndex;
+        private Long userId; 
+        private Long templateId; 
+        private Integer blankIndex;
+
         public Key() {}
-        public Key(Long u, Long t, Integer b) { userId=u; templateId=t; blankIndex=b; }
-        @Override public boolean equals(Object o){ if(this==o) return true;
-            if(!(o instanceof Key k)) return false;
-            return Objects.equals(userId,k.userId)&&Objects.equals(templateId,k.templateId)&&Objects.equals(blankIndex,k.blankIndex);}
-        @Override public int hashCode(){ return Objects.hash(userId,templateId,blankIndex);}
+
+        public Key(Long u, Long t, Integer b) {
+            userId=u; 
+            templateId=t; 
+            blankIndex=b; 
+        }
+        // @Override 
+        // public boolean equals(Object o){ if(this==o) return true;
+        //     if(!(o instanceof Key k)) return false;
+        //     return Objects.equals(userId,k.userId)&&Objects.equals(templateId,k.templateId)&&Objects.equals(blankIndex,k.blankIndex);}
+        @Override public int hashCode(){ 
+            return Objects.hash(userId,templateId,blankIndex);}
         }
         // getters/setters
 
