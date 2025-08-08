@@ -6,6 +6,8 @@ import com.vocadabulary.repositories.FlashcardRepository;
 import com.vocadabulary.repositories.UserFlashcardRepository;
 import com.vocadabulary.repositories.UserProgressSummaryRepository;
 import com.vocadabulary.repositories.UserQuizSummaryRepository;
+import com.vocadabulary.repositories.UserSentenceAttemptFillRepository;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,19 +16,23 @@ public class UserProgressSummaryService {
     private final FlashcardRepository flashcardRepo;
     private final UserFlashcardRepository userFlashcardRepo;
     private final UserProgressSummaryRepository userProgressSummaryRepo;
-    private final UserQuizSummaryRepository userQuizSummaryRepo; // <-- ADD THIS
+    private final UserQuizSummaryRepository userQuizSummaryRepo;
+    private final UserSentenceAttemptFillRepository userSentenceAttemptFillRepo;
+
 
     // Update constructor
     public UserProgressSummaryService(
         FlashcardRepository flashcardRepo,
         UserFlashcardRepository userFlashcardRepo,
         UserProgressSummaryRepository userProgressSummaryRepo,
-        UserQuizSummaryRepository userQuizSummaryRepo // <-- ADD THIS
+        UserQuizSummaryRepository userQuizSummaryRepo,
+        UserSentenceAttemptFillRepository userSentenceAttemptFillRepo
     ) {
         this.flashcardRepo = flashcardRepo;
         this.userFlashcardRepo = userFlashcardRepo;
         this.userProgressSummaryRepo = userProgressSummaryRepo;
-        this.userQuizSummaryRepo = userQuizSummaryRepo; // <-- ADD THIS
+        this.userQuizSummaryRepo = userQuizSummaryRepo;
+        this.userSentenceAttemptFillRepo = userSentenceAttemptFillRepo;
     }
 
     public void refreshLastActive(long userId) {
@@ -45,13 +51,18 @@ public class UserProgressSummaryService {
             quizzesPassed = quizSummary.getQuizzesPassed();
         }
 
+        // sentence proficiency (%)
+        long totalBlanks = userSentenceAttemptFillRepo.countTotalBlanksAttempted(userId);
+        long firstTryCorrect = userSentenceAttemptFillRepo.countFirstTryCorrect(userId);
+        float sentenceProficiency = (totalBlanks == 0) ? 0f
+                : (firstTryCorrect * 100f / (float) totalBlanks);
+
         return new UserProgressSummaryDTO(
             totalCards,
             inProgress,
             learned,
-            "Placeholder comprehension",
-            "Placeholder language use",
-            quizzesPassed      // <-- NEW
+            quizzesPassed,
+            sentenceProficiency
         );
     }
 }
