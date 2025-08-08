@@ -10,12 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.vocadabulary.services.UserFlashcardService;
-import com.vocadabulary.models.UserFlashcard;
 import com.vocadabulary.auth.MockUser;
 import com.vocadabulary.auth.MockUserContext;
 import com.vocadabulary.dto.FlashcardDTO;
 import com.vocadabulary.dto.FlashcardRequest;
-import com.vocadabulary.dto.WalletFlashcardDTO;
 import com.vocadabulary.services.TtsService;
 
 import java.util.List;
@@ -44,7 +42,20 @@ public class FlashcardController {
         return flashcardService.getAllFlashcardDTOs();
     }
 
-    // ✅ Get one flashcard by ID (entity)
+    // ⭐ NEW: Get only flashcards visible to the current (mock) user (public + mine)
+    // Optional topic filter: /api/flashcards/visible?topicId=123
+    @GetMapping("/visible")
+    public List<FlashcardDTO> getVisible(@RequestParam(required = false) Long topicId) {
+        MockUser current = MockUserContext.getCurrentUser();
+        if (current == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No mock user");
+        }
+        return (topicId == null)
+                ? flashcardService.getVisibleFlashcardDTOs(current.getId())
+                : flashcardService.getVisibleFlashcardDTOsByTopic(topicId, current.getId());
+    }
+
+    // ✅ Get one flashcard by ID (entity) — **UNCHANGED**
     @GetMapping("/{id}")
     public ResponseEntity<Flashcard> getFlashcardById(@PathVariable Long id) {
         Flashcard flashcard = flashcardService.getFlashcardById(id);
@@ -83,7 +94,7 @@ public class FlashcardController {
         return flashcardService.createFlashcardInTopic(request.getTopicId(), flashcard);
     }
 
-    // ✅ Update a flashcard (if user is creator or admin)
+    // ✅ Update a flashcard (if user is creator or admin) — **UNCHANGED**
     @PutMapping("/{id}")
     public ResponseEntity<?> updateFlashcard(@PathVariable Long id, @RequestBody Flashcard updatedFlashcard) {
         try {
@@ -96,7 +107,7 @@ public class FlashcardController {
         }
     }
 
-    // ✅ Delete a flashcard (if user is creator or admin)
+    // ✅ Delete a flashcard (if user is creator or admin) — **UNCHANGED**
     @DeleteMapping("/{id}")
     public void deleteFlashcard(@PathVariable Long id) {
         Flashcard card = flashcardService.getFlashcardById(id);
@@ -112,7 +123,7 @@ public class FlashcardController {
         flashcardService.deleteFlashcard(id);
     }
 
-    // ✅ TTS audio bytes
+    // ✅ TTS audio bytes — **UNCHANGED**
     @GetMapping("/{id}/tts")
     public ResponseEntity<byte[]> getFlashcardTts(@PathVariable Long id) {
         Flashcard flashcard = flashcardService.getFlashcardById(id);
@@ -126,7 +137,7 @@ public class FlashcardController {
         return new ResponseEntity<>(audio, headers, HttpStatus.OK);
     }
 
-    // ✅ How many flashcards were created by the current (mock) user
+    // ✅ How many flashcards were created by the current (mock) user — **UNCHANGED**
     @GetMapping("/stats/created")
     public Map<String, Long> getCreatedCountForCurrentUser() {
         MockUser current = MockUserContext.getCurrentUser();

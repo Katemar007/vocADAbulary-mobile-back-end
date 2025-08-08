@@ -179,7 +179,7 @@ public class FlashcardService {
         return saved;
     }
 
-    // ✅ Delete flashcard (admins or creator only)
+    // ✅ Delete flashcard (admins or creator only)  **UNCHANGED**
     public void deleteFlashcard(Long id) {
         MockUser currentUser = MockUserContext.getCurrentUser();
         if (currentUser == null) {
@@ -237,7 +237,7 @@ public class FlashcardService {
         progressSummaryService.refreshLastActive(currentUser.getId());
     }
 
-    // ✅ Update a flashcard (admins or creator only)
+    // ✅ Update a flashcard (admins or creator only)  **UNCHANGED**
     public Flashcard updateFlashcard(Long id, Flashcard updatedFlashcard) {
         MockUser currentUser = MockUserContext.getCurrentUser();
         if (currentUser == null) {
@@ -292,5 +292,76 @@ public class FlashcardService {
     // ✅ NEW: Count how many flashcards a given user has created (for Progress "Created")
     public long countCreatedByUser(Long userId) {
         return flashcardRepo.countByCreatedBy(userId);
+    }
+
+    // ===================== NEW: visibility-filtered service methods =====================
+
+    public List<FlashcardDTO> getVisibleFlashcardDTOs(Long userId) {
+        List<Flashcard> flashcards = flashcardRepo.findVisibleForUser(userId);
+
+        // keep parity with other list endpoints: generate phonetics best-effort
+        for (Flashcard f : flashcards) {
+            try {
+                if (f.getPhonetic() == null || f.getPhonetic().isBlank()) {
+                    String phonetic = phoneticService.generateIPA(f.getWord());
+                    f.setPhonetic(phonetic);
+                    flashcardRepo.save(f);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to generate phonetic for word '{}': {}", f.getWord(), e.getMessage());
+            }
+        }
+
+        return flashcards.stream()
+                .map(f -> new FlashcardDTO(
+                        f.getId(),
+                        f.getWord(),
+                        f.getDefinition(),
+                        f.getExample(),
+                        f.getSynonyms(),
+                        f.getPhonetic(),
+                        f.getCreatedAt(),
+                        f.getCreatedBy(),
+                        f.getTopic() != null ? f.getTopic().getId() : null,
+                        f.getTopic() != null ? f.getTopic().getName() : null
+                ))
+                .toList();
+    }
+
+    public List<FlashcardDTO> getVisibleFlashcardDTOsByTopic(Long topicId, Long userId) {
+        List<Flashcard> flashcards = flashcardRepo.findVisibleForUserByTopic(topicId, userId);
+
+        for (Flashcard f : flashcards) {
+            try {
+                if (f.getPhonetic() == null || f.getPhonetic().isBlank()) {
+                    String phonetic = phoneticService.generateIPA(f.getWord());
+                    f.setPhonetic(phonetic);
+                    flashcardRepo.save(f);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to generate phonetic for word '{}': {}", f.getWord(), e.getMessage());
+            }
+        }
+
+        return flashcards.stream()
+                .map(f -> new FlashcardDTO(
+                        f.getId(),
+                        f.getWord(),
+                        f.getDefinition(),
+                        f.getExample(),
+                        f.getSynonyms(),
+                        f.getPhonetic(),
+                        f.getCreatedAt(),
+                        f.getCreatedBy(),
+                        f.getTopic() != null ? f.getTopic().getId() : null,
+                        f.getTopic() != null ? f.getTopic().getName() : null
+                ))
+                .toList();
+    }
+
+    // optional helper if you ever want a secure single-card fetch:
+    public Flashcard getVisibleFlashcardById(Long id, Long userId) {
+        return flashcardRepo.findVisibleByIdForUser(id, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Not allowed"));
     }
 }
