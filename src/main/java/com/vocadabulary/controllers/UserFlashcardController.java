@@ -62,8 +62,12 @@ public class UserFlashcardController {
             @RequestBody Map<String, String> body) {
 
         String newStatus = body.get("status");
-        userFlashcardService.updateFlashcardStatus(userId, flashcardId, newStatus);
-        return Map.of("message", "Flashcard status updated to " + newStatus);
+        boolean generated = userFlashcardService.updateFlashcardStatus(userId, flashcardId, newStatus);
+        if (generated) {
+            return Map.of("message", "Flashcard status updated to " + newStatus + " and AI sentence generated: " + String.valueOf(generated));
+        } else {
+            return Map.of("message", "Flashcard status updated to " + newStatus + " but no AI sentence generated.");
+        }
     }
     /** Hide a flashcard (sets isHidden=true) */
     @PutMapping("/{flashcardId}/hide")
