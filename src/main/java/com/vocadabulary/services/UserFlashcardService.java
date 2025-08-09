@@ -20,54 +20,88 @@ public class UserFlashcardService {
     private final UserFlashcardRepository userFlashcardRepo;
     private final UserRepository userRepo;
     private final FlashcardRepository flashcardRepo;
+    private final SentenceGenerationService sentenceGen;
 
     public UserFlashcardService(
         UserFlashcardRepository userFlashcardRepo,
         UserRepository userRepo,
-        FlashcardRepository flashcardRepo
+        FlashcardRepository flashcardRepo,
+        SentenceGenerationService sentenceGen
     ) {
         this.userFlashcardRepo = userFlashcardRepo;
         this.userRepo = userRepo;
         this.flashcardRepo = flashcardRepo;
+        this.sentenceGen = sentenceGen;
     }
 
     @Transactional
-    public void updateFlashcardStatus(Long userId, Long flashcardId, String newStatus) {
-        System.out.println("=== updateFlashcardStatus called with userId=" + userId + ", flashcardId=" + flashcardId + ", newStatus=" + newStatus);
+    public boolean updateFlashcardStatus(Long userId, Long flashcardId, String newStatus) {
+        System.out.println("=== updateFlashcardStatus called with userId=" + userId 
+            + ", flashcardId=" + flashcardId 
+            + ", newStatus=" + newStatus);
+
+        boolean generated = false;
+
         UserFlashcardId ufId = new UserFlashcardId(userId, flashcardId);
 
-        UserFlashcard userFlashcard = userFlashcardRepo.findById(ufId)
-            .orElseGet(() -> {
-                System.out.println("   --> UserFlashcard does not exist yet. Creating new.");
-                User user = userRepo.findById(userId)
-                    .orElseThrow(() -> {
-                        System.out.println("   --> USER NOT FOUND for id=" + userId);
-                        return new IllegalArgumentException("User not found");
-                    });
-                System.out.println("   --> Found user: " + user);
-                Flashcard flashcard = flashcardRepo.findById(flashcardId)
-                    .orElseThrow(() -> {
-                        System.out.println("   --> FLASHCARD NOT FOUND for id=" + flashcardId);
-                        return new IllegalArgumentException("Flashcard not found");
-                    });
-                System.out.println("   --> Found flashcard: " + flashcard);
-                UserFlashcard newUf = new UserFlashcard();
-                newUf.setId(ufId); // <-- CRITICAL: Set the composite ID
-                newUf.setUser(user);
-                newUf.setFlashcard(flashcard);
-                newUf.setStatus(newStatus != null ? newStatus : "IN_PROGRESS");
-                newUf.setInWallet(false); // or true if needed
-                newUf.setHidden(false);
-                newUf.setLastReviewed(java.time.LocalDateTime.now());
-                System.out.println("   --> Saving new UserFlashcard: " + newUf);
-                return userFlashcardRepo.save(newUf);
-            });
+        // Capture previous status (if UF exists)
+        var existing = userFlashcardRepo.findById(ufId);
+        String prevStatus = existing.map(UserFlashcard::getStatus).orElse(null);
+        System.out.println("   --> Previous status = " + prevStatus);
+
+        UserFlashcard userFlashcard = existing.orElseGet(() -> {
+            System.out.println("   --> UserFlashcard does not exist yet. Creating new.");
+            User user = userRepo.findById(userId)
+                .orElseThrow(() -> {
+                    System.out.println("   --> USER NOT FOUND for id=" + userId);
+                    return new IllegalArgumentException("User not found");
+                });
+            System.out.println("   --> Found user: " + user);
+
+            Flashcard flashcard = flashcardRepo.findById(flashcardId)
+                .orElseThrow(() -> {
+                    System.out.println("   --> FLASHCARD NOT FOUND for id=" + flashcardId);
+                    return new IllegalArgumentException("Flashcard not found");
+                });
+            System.out.println("   --> Found flashcard: " + flashcard);
+
+            UserFlashcard newUf = new UserFlashcard();
+            newUf.setId(ufId); // composite ID
+            newUf.setUser(user);
+            newUf.setFlashcard(flashcard);
+            newUf.setStatus(newStatus != null ? newStatus : "IN_PROGRESS");
+            newUf.setInWallet(false);
+            newUf.setHidden(false);
+            newUf.setLastReviewed(java.time.LocalDateTime.now());
+
+            System.out.println("   --> Saving new UserFlashcard: " + newUf);
+            return userFlashcardRepo.save(newUf);
+        });
 
         System.out.println("   --> userFlashcard entity about to be updated: " + userFlashcard);
         userFlashcard.setStatus(newStatus);
         userFlashcard.setLastReviewed(java.time.LocalDateTime.now());
         userFlashcardRepo.save(userFlashcard);
         System.out.println("   --> userFlashcard updated and saved.");
+
+        // Trigger only on transition to LEARNED
+        boolean justLearned = "LEARNED".equalsIgnoreCase(newStatus)
+                && (prevStatus == null || !"LEARNED".equalsIgnoreCase(prevStatus));
+
+        if (justLearned) {
+            try {
+                System.out.println("   --> Status transitioned to LEARNED. Generating AI sentence for flashcardId=" + flashcardId);
+                sentenceGen.generateAndSaveSentenceForLearnedWord(flashcardId);
+                generated = true;
+                System.out.println("   --> AI sentence generation completed for flashcardId=" + flashcardId);
+            } catch (Exception e) {
+                System.out.println("   --> AI sentence generation failed: " + e.getMessage());
+            }
+        } else {
+            System.out.println("   --> No AI generation (either not LEARNED or already LEARNED).");
+        }
+
+        return generated;
     }
 
     // --- Basic Getters ---

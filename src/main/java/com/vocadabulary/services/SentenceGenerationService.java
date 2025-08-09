@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.vocadabulary.repositories.TopicRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -37,13 +38,26 @@ public class SentenceGenerationService {
         this.blankRepo = blankRepo;
     }
 
+    /**
+     * Generates a sentence with a blank for a learned word and saves it to the database.
+     * This method is idempotent: it will not generate a new sentence if one already exists for the flashcard.
+     *
+     * @param flashcardId The ID of the flashcard for which to generate the sentence.
+     */
+    @Async
     public void generateAndSaveSentenceForLearnedWord(Long flashcardId) {
+        // ✅ Idempotency: skip if we already generated a template for this flashcard
+        if (blankRepo.existsByTargetFlashcardId(flashcardId)) {
+            System.out.println("ℹ️ Template already exists for flashcard " + flashcardId + ", skipping.");
+            return;
+        }
+
         // 1) Get word and topic
         String word = flashcardRepo.findWordById(flashcardId);
         Long topicId = topicRepo.findTopicIdForFlashcard(flashcardId);
-        String topicName = topicId != null ? topicRepo.findTopicName(topicId) : "general";
+        String topicName = (topicId != null) ? topicRepo.findTopicName(topicId) : "general";
 
-        if (word == null) {
+        if (word == null || word.isBlank()) {
             System.out.println("⚠️ No word found for flashcard ID " + flashcardId);
             return;
         }
@@ -72,6 +86,7 @@ public class SentenceGenerationService {
         System.out.println("✅ Saved AI sentence for word '" + word + "': " + sentence);
     }
 
+    // Generates a sentence with a blank using OpenAI API
     private String generateSentenceWithBlank(String word, String topic) {
         String prompt = String.format(
             "Write ONE simple English sentence about the topic \"%s\" that contains the word \"%s\". " +

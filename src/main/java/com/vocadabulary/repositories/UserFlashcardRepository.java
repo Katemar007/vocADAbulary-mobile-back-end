@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, UserFlashcardId> {
@@ -19,6 +20,9 @@ public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, Us
 
        // All user_flashcards with a given status
        List<UserFlashcard> findByUserIdAndStatusAndIsHiddenFalse(Long userId, String status);
+
+       // Find a specific user_flashcard by userId and flashcardId
+       Optional<UserFlashcard> findByUserIdAndFlashcardId(Long userId, Long flashcardId);
 
        // Count methods (still useful)
        int countByUserIdAndStatus(Long userId, String status);
