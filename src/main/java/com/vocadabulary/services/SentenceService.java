@@ -171,7 +171,9 @@ public class SentenceService {
         statsRepo.save(stats);
 
         boolean reveal = stats.getFailStreak() >= 3;
-        String revealedWord = null; // can fill from FlashcardRepository if b.targetFlashcardId != null
+        String revealedWord = (b != null && b.getTargetFlashcardId() != null)
+            ? flashcardRepo.findWordById(b.getTargetFlashcardId())
+            : null;
         perBlank.add(new PerBlank(idx, isCorrect, reveal, revealedWord));
 
         // persist fill
