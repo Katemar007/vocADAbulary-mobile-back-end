@@ -24,6 +24,7 @@ public class SentenceService {
     private final SentenceTemplateRepository templateRepo;
     private final SentenceTemplateBlankRepository blankRepo;
     private final UserFlashcardRepository userFlashcardRepo;
+    private final FlashcardRepository flashcardRepo;
     private final UserSentenceAttemptRepository attemptRepo;
     private final UserSentenceAttemptFillRepository fillRepo;
     private final UserSentenceBlankStatsRepository statsRepo;
@@ -34,12 +35,14 @@ public class SentenceService {
         SentenceTemplateRepository templateRepo,
         SentenceTemplateBlankRepository blankRepo,
         UserFlashcardRepository userFlashcardRepo,
+        FlashcardRepository flashcardRepo,
         UserSentenceAttemptRepository attemptRepo,
         UserSentenceAttemptFillRepository fillRepo,
         UserSentenceBlankStatsRepository statsRepo) {
             this.templateRepo = templateRepo;
             this.blankRepo = blankRepo;
             this.userFlashcardRepo = userFlashcardRepo;
+            this.flashcardRepo = flashcardRepo;
             this.attemptRepo = attemptRepo;
             this.fillRepo = fillRepo;
             this.statsRepo = statsRepo;
@@ -78,7 +81,7 @@ public class SentenceService {
         SentenceTemplateBlank b = byIdx.get(idx);
         if (reveal && b != null && b.getTargetFlashcardId() != null) {
           // You can inject FlashcardRepository if you want exact word here; or resolve at finalize
-          // revealedWord = flashcardRepo.findWordById(b.getTargetFlashcardId());
+        revealedWord = flashcardRepo.findWordById(b.getTargetFlashcardId());
         }
         chunks.add(new Chunk("blank", null, idx, reveal, revealedWord));
       }
