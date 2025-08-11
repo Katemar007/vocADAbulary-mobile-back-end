@@ -75,4 +75,10 @@ public interface UserFlashcardRepository extends JpaRepository<UserFlashcard, Us
               "WHERE uf.user.id = :userId AND uf.flashcard.id = :flashcardId")
        void setInWalletFalse(@Param("userId") Long userId,
                             @Param("flashcardId") Long flashcardId);
+
+       // adding this for being able to delete flashcard created by user
+       @Modifying
+       @Transactional
+       @Query("DELETE FROM UserFlashcard uf WHERE uf.flashcard.id = :flashcardId")
+       void deleteByFlashcardId(@Param("flashcardId") Long flashcardId);
 }

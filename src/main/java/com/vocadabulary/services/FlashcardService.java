@@ -14,6 +14,7 @@ import com.vocadabulary.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -180,23 +181,26 @@ public class FlashcardService {
     }
 
     // ✅ Delete flashcard (admins or creator only)  **UNCHANGED**
+    @Transactional
     public void deleteFlashcard(Long id) {
         MockUser currentUser = MockUserContext.getCurrentUser();
-        if (currentUser == null) {
-            throw new IllegalStateException("Unauthorized: No mock user");
-        }
+        if (currentUser == null) throw new IllegalStateException("Unauthorized: No mock user");
 
-        Optional<Flashcard> optionalCard = flashcardRepo.findById(id);
-        if (optionalCard.isEmpty()) {
-            throw new IllegalArgumentException("Flashcard not found");
-        }
+        Flashcard card = flashcardRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
 
-        Flashcard card = optionalCard.get();
-        if ("admin".equalsIgnoreCase(currentUser.getRole()) || currentUser.getId() == card.getCreatedBy()) {
-            flashcardRepo.deleteById(id);
-        } else {
+        boolean canDelete = "admin".equalsIgnoreCase(currentUser.getRole())
+                || currentUser.getId() == card.getCreatedBy();
+
+        if (!canDelete) {
             throw new IllegalStateException("Unauthorized: You can only delete your own flashcards");
         }
+
+        // 🔧 Remove wallet links first to satisfy FK constraints
+        userFlashcardRepo.deleteByFlashcardId(id);
+
+        // Now delete the flashcard
+        flashcardRepo.deleteById(id);
     }
 
     // ✅ Add a flashcard to the user's wallet (mock user version)
