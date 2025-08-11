@@ -108,19 +108,11 @@ public class FlashcardController {
     }
 
     // ✅ Delete a flashcard (if user is creator or admin) — **UNCHANGED**
+    // Delete a flashcard (creator or admin) — delegate auth to service
     @DeleteMapping("/{id}")
-    public void deleteFlashcard(@PathVariable Long id) {
-        Flashcard card = flashcardService.getFlashcardById(id);
-
-        if (card.getCreatedBy() == null) {
-            throw new IllegalStateException("This flashcard has no creator info. Only cards you created yourself can be deleted.");
-        }
-        Long mockUserId = 1L; // adjust if needed
-        if (!card.getCreatedBy().equals(mockUserId)) {
-            throw new IllegalStateException("You can only delete flashcards you created.");
-        }
-
-        flashcardService.deleteFlashcard(id);
+    public ResponseEntity<Void> deleteFlashcard(@PathVariable Long id) {
+        flashcardService.deleteFlashcard(id);  // service checks MockUserContext vs createdBy/admin
+        return ResponseEntity.noContent().build();
     }
 
     // ✅ TTS audio bytes — **UNCHANGED**
