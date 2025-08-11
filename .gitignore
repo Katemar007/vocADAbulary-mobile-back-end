@@ -28,6 +28,9 @@ replay_pid*
 .env.local
 .vscode/
 .idea/
+src/main/resources/application-prod.properties
+
+
 
 # Build artifacts
 target/
