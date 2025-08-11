@@ -71,16 +71,6 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>9.22.3</version>
-                <configuration>
-                    <url>jdbc:postgresql://dpg-d1sapvripnbc73dso0eg-a.oregon-postgres.render.com/voc_ada_bulary_db</url>
-                    <user>voc_ada_bulary_db_user</user>
-                    <password>tPnEQxM687sQj6MwAxmzl38rZMQohl0g</password>
-                    <locations>
-                        <location>classpath:db/migration</location>
-                    </locations>
-                    <baselineOnMigrate>true</baselineOnMigrate>
-                    <cleanDisabled>false</cleanDisabled>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -33,30 +33,6 @@ public class UserController {
         System.out.println(">>> DB URL: " + System.getProperty("spring.datasource.url"));
     }
 
-    // 🔐 Login endpoint using username only
-    // @PostMapping("/login")
-    // public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
-    //     // 🔍 ADD THESE LINES:
-    //     System.out.println("🔐 Hit /login endpoint");
-    //     System.out.println("📨 Raw request: " + loginRequest);
-    //     System.out.println("📨 Username: " + loginRequest.getUsername());
-
-    //     String username = loginRequest.getUsername();
-
-    //     Optional<User> userOpt = userService.getUserByUsername(username);
-
-    //     if (userOpt.isPresent()) {
-    //         User user = userOpt.get();
-    //         MockUser mockUser = new MockUser(user.getId(), "student"); // hardcoded role
-    //         return ResponseEntity.ok(mockUser);
-    //     } else {
-    //         return ResponseEntity
-    //                 .status(HttpStatus.UNAUTHORIZED)
-    //                 .body("Invalid username");
-    //     }
-    // }
-
-
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         System.out.println("🔐 Hit /login endpoint");
@@ -158,13 +134,13 @@ public class UserController {
     }
 
     // 🔧 Optional: use this to check if mock user is set properly
-//    @GetMapping("/test-auth")
-//    public ResponseEntity<String> testAuth() {
-//        MockUser currentUser = MockUserContext.getCurrentUser();
-//        if (currentUser != null) {
-//            return ResponseEntity.ok("User: " + currentUser.getId() + ", Role: " + currentUser.getRole());
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No mock user set");
-//        }
-//    }
+   @GetMapping("/test-auth")
+   public ResponseEntity<String> testAuth() {
+       MockUser currentUser = MockUserContext.getCurrentUser();
+       if (currentUser != null) {
+           return ResponseEntity.ok("User: " + currentUser.getId() + ", Role: " + currentUser.getRole());
+       } else {
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No mock user set");
+       }
+   }
 }
