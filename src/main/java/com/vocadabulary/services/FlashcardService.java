@@ -123,15 +123,23 @@ public class FlashcardService {
                 String phonetic = phoneticService.generateIPA(flashcard.getWord());
                 flashcard.setPhonetic(phonetic);
                 flashcardRepo.save(flashcard);
-
-                byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
-                String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
-                flashcard.setAudioBase64(audioBase64);
             } catch (Exception e) {
-                log.warn("Failed to enrich flashcard {} with phonetic/audio: {}", id, e.getMessage());
+                log.warn("Failed to generate phonetic for word '{}': {}", flashcard.getWord(), e.getMessage());
             }
         }
-
+        // generate audio if TTS is enables
+        try{                
+            byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
+            if (audioBytes.length > 0) {
+                // Convert to Base64 for easy transport
+                String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
+            } else {
+                log.warn("No audio generated for flashcard {} (TTS disabled or failed)", id, flashcard.getWord());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to enrich flashcard {} with phonetic/audio: {}", id, e.getMessage());
+        }
+        // Return the flashcard with phonetic and audio (if available)
         return flashcard;
     }
 
@@ -141,25 +149,40 @@ public class FlashcardService {
 
         MockUser currentUser = MockUserContext.getCurrentUser();
         if (currentUser == null) {
-            throw new IllegalStateException("Unauthorized: No mock user");
+            throw new IllegalStateException("Unauthorized: you need to log in.");
         }
 
         flashcard.setTopic(topic);
         flashcard.setCreatedBy(currentUser.getId());
         flashcard.setCreatedAt(LocalDateTime.now());
 
-        // Try to enrich with phonetic + audio (best-effort)
+        // Try to enrich with phonetic (best-effort)
         try {
             String phonetic = phoneticService.generateIPA(flashcard.getWord());
-            byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
-            String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
-
-            flashcard.setPhonetic(phonetic);
-            flashcard.setAudioBase64(audioBase64);
+            if (phonetic.length() > 0) {
+                flashcard.setPhonetic(phonetic);
+            } else {
+                log.warn("No phonetic generated for new flashcard '{}' (TTS disabled or failed)", flashcard.getWord());
+                flashcard.setPhonetic   (null); // or set to empty string
+            }
         } catch (Exception e) {
             log.warn("Failed to enrich newly created flashcard '{}': {}", flashcard.getWord(), e.getMessage());
         }
+        try {
+            // Generate audio using TTS service
 
+            byte[] audioBytes = ttsService.generateAudio(flashcard.getWord());
+            if (audioBytes.length > 0) {
+                String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
+                flashcard.setAudioBase64(audioBase64);
+            } else {
+                log.warn("No audio generated for new flashcard '{}' (TTS disabled or failed)", flashcard.getWord());
+                flashcard.setAudioBase64(null); // or set to empty string
+            }
+        } catch (Exception e) {
+            log.warn("Failed to enrich newly created flashcard '{}': {}", flashcard.getWord(), e.getMessage());
+        }
+        // Ensure ID is null to insert as new record
         flashcard.setId(null); // ensure insert
         Flashcard saved = flashcardRepo.save(flashcard);
 

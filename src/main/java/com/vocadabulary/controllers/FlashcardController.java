@@ -134,6 +134,12 @@ public class FlashcardController {
         byte[] audio = ttsService.generateAudio(flashcard.getWord());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        if (audio.length == 0) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .headers(headers)    
+                .body("TTS service is currently unavailable. Please try again later.".getBytes());
+        }
         return new ResponseEntity<>(audio, headers, HttpStatus.OK);
     }
 

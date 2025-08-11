@@ -10,7 +10,11 @@ import com.vocadabulary.repositories.TopicRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +27,7 @@ public class SentenceGenerationService {
     private final SentenceTemplateRepository templateRepo;
     private final SentenceTemplateBlankRepository blankRepo;
 
-    @Value("${OPENAI_API_KEY}")
+    @Value("${openai.api.key:}")
     private String apiKey;
 
     private static final String OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -88,6 +92,11 @@ public class SentenceGenerationService {
 
     // Generates a sentence with a blank using OpenAI API
     private String generateSentenceWithBlank(String word, String topic) {
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            System.out.println("⚠️ OpenAI API key is missing. Skipping sentence generation for word: " + word);
+            return null; // Fallback to null, triggering the check in generateAndSaveSentenceForLearnedWord
+        }
+
         String prompt = String.format(
             "Write ONE simple English sentence about the topic \"%s\" that contains the word \"%s\". " +
             "Replace that word with exactly three underscores ___ once. " +
@@ -112,14 +121,20 @@ public class SentenceGenerationService {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        Map<?, ?> response = restTemplate.postForObject(OPENAI_CHAT_URL, request, Map.class);
-        if (response != null && response.containsKey("choices")) {
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
-            if (!choices.isEmpty()) {
-                Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-                return message.get("content").toString().trim();
+        try {
+            Map<?, ?> response = restTemplate.postForObject(OPENAI_CHAT_URL, request, Map.class);
+            if (response != null && response.containsKey("choices")) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+                if (!choices.isEmpty()) {
+                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                    return message.get("content").toString().trim();
+                }
             }
+            System.out.println("⚠️ No valid response from OpenAI for word: " + word);
+            return null; // Fallback to null if no valid response
+        } catch (RestClientException e) {
+            System.out.println("⚠️ Error occurred while calling OpenAI API for word: " + word);
+            return null; // Fallback to null on error
         }
-        return null;
     }
 }
