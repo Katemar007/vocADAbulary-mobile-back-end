@@ -8,10 +8,12 @@ public class TemplateDTOs {
         public String templateText;
         public String contextTopic;       // optional text
     }
+    
     public static class UpdateTemplateRequest {
         public String templateText;
         public String contextTopic;
     }
+    
     public static class TemplateResponse {
         public Long id;
         public String templateText;
@@ -26,24 +28,35 @@ public class TemplateDTOs {
             this.contextTopic = contextTopic;
             this.createdAt = createdAt;
         }
+
+        // Add getters
+        public Long getId() { return id; }
+        public String getTemplateText() { return templateText; }
+        public String getSource() { return source; }
+        public String getContextTopic() { return contextTopic; }
+        public Instant getCreatedAt() { return createdAt; }
     }
 
     public static class TemplateResponseWithBlank extends TemplateResponse {
-    public Long flashcardId;
-    public int blankIndex;
+        public Long flashcardId;
+        public int blankIndex;
 
-    public TemplateResponseWithBlank(
-        Long id,
-        String templateText,
-        String source,
-        String contextTopic,
-        Instant createdAt,
-        Long flashcardId,
-        int blankIndex
-    ) {
-        super(id, templateText, source, contextTopic, createdAt);
-        this.flashcardId = flashcardId;
-        this.blankIndex = blankIndex;
+        public TemplateResponseWithBlank(
+            Long id,
+            String templateText,
+            String source,
+            String contextTopic,
+            Instant createdAt,
+            Long flashcardId,
+            int blankIndex
+        ) {
+            super(id, templateText, source, contextTopic, createdAt);
+            this.flashcardId = flashcardId;
+            this.blankIndex = blankIndex;
+        }
+
+        // Add getters for new fields
+        public Long getFlashcardId() { return flashcardId; }
+        public int getBlankIndex() { return blankIndex; }
     }
-}
 }

@@ -8,7 +8,9 @@ public interface SentenceTemplateBlankRepository extends JpaRepository<SentenceT
     List<SentenceTemplateBlank> findByTemplateIdOrderByBlankIndexAsc(Long templateId);
 
     SentenceTemplateBlank findByTemplateId(Long templateId);
-    
+
+    List<SentenceTemplateBlank> findByTargetFlashcardId(Long flashcardId);
+
     // This method is used to check if a blank exists for a specific flashcard
     boolean existsByTargetFlashcardId(Long targetFlashcardId);
 

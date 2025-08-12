@@ -8,6 +8,7 @@ import com.vocadabulary.services.SentenceService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,7 +34,30 @@ public class SentenceController {
 
     @GetMapping("/templates/random")
     public TemplateResponseWithBlank getRandomTemplate() {
-        return service.getRandomTemplateForUser(currentUserId());
-}
-}
+        try {
+            System.out.println("Getting random template for user: " + currentUserId());
+            TemplateResponseWithBlank result = service.getRandomTemplateForUser();
+            System.out.println("Successfully got template: " + result.getId());
+            return result;
+        } catch (Exception e) {
+            System.err.println("Error getting random template: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
+    @PostMapping("/reset")
+    public ResponseEntity<String> resetSentence(@RequestBody java.util.Map<String, Long> payload) {
+        Long templateId = payload.get("templateId");
+        if (templateId == null) {
+            return ResponseEntity.badRequest().body("Template ID is required");
+        }
+        try {
+            service.resetSessionStats(templateId);
+            return ResponseEntity.ok("Session stats reset successfully");
+        } catch (Exception e) {
+            System.err.println("Error resetting sentence: " + e.getMessage());
+            return ResponseEntity.status(500).body("Failed to reset: " + e.getMessage());
+        }
+    }
+}
